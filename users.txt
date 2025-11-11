@@ -1,0 +1,172 @@
+# HAPI FHIR Test Patients
+# These patient IDs are verified to exist on https://hapi.fhir.org/baseR4
+# Use these IDs for testing the FHIR Chat API with RAG-enabled triage
+
+# Format: PATIENT_ID | Name | Gender | Birth Date | Notes
+# ================================================================
+
+# RECOMMENDED TEST PATIENTS (with complete data)
+# ================================================================
+
+47936371 | Aage Test | Male | 2002-10-27 | Young adult male (22 years old) - Good for general testing
+
+47936476 | Vimal Thomas Joseph | Male | 1980-01-01 | Middle-aged male (44 years old) - Good for cardiac risk testing
+
+47026052 | Karla Nuñez | Female | 1980-02-01 | Middle-aged female - Good for general testing
+
+47077394 | Luis Riquelme | Male | 1982-01-01 | Middle-aged male - Good for testing
+
+# ADDITIONAL TEST PATIENTS
+# ================================================================
+
+47051312 | Karla Nuñez | Female | 1980-01-02 | Alternative female patient
+
+47936378 | Aage Test | Male | 2002-10-27 | Duplicate of 47936371 (same person)
+
+47936493 | Karla Nuñez | Female | 1980-01-02 | Alternative female patient
+
+47936494 | Karla Nuñez | Female | 1980-01-02 | Alternative female patient
+
+# PATIENTS WITH LIMITED DATA (use for basic testing only)
+# ================================================================
+
+47936361 | Unknown | Unknown | Unknown | Minimal data available
+
+47936380 | Unknown | Unknown | Unknown | Minimal data available
+
+47936390 | Unknown | Unknown | Unknown | Minimal data available
+
+47936416 | Unknown | Unknown | Unknown | Minimal data available
+
+47936422 | Unknown | Unknown | Unknown | Minimal data available
+
+47936430 | Unknown | Unknown | Unknown | Minimal data available
+
+47936440 | Unknown | Unknown | Unknown | Minimal data available
+
+
+# ================================================================
+# HOW TO USE THESE PATIENT IDs
+# ================================================================
+
+# TEST 1: Get Patient Demographics
+curl http://localhost:8002/api/v1/patients/47936371/demographics
+
+# TEST 2: Get Complete Patient History (includes conditions, medications, allergies)
+curl http://localhost:8002/api/v1/patients/47936371
+
+# TEST 3: Triage with Patient Context (RAG + FHIR data)
+curl -X POST "http://localhost:8002/api/v1/triage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "I have crushing chest pain radiating to my arm",
+    "patient_id": "47936371"
+  }'
+
+# TEST 4: Chat with Patient Context
+curl -X POST "http://localhost:8002/api/v1/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "I have a headache",
+    "patient_id": "47936371"
+  }'
+
+# TEST 5: Get Patient Conditions
+curl http://localhost:8002/api/v1/patients/47936371/conditions
+
+# TEST 6: Get Patient Medications
+curl http://localhost:8002/api/v1/patients/47936371/medications
+
+# TEST 7: Get Patient Allergies
+curl http://localhost:8002/api/v1/patients/47936371/allergies
+
+
+# ================================================================
+# SWAGGER UI TESTING (RECOMMENDED)
+# ================================================================
+
+1. Open: http://localhost:8002/docs
+2. Use any patient ID from above in the "patient_id" field
+3. Try different symptom descriptions to test RAG
+
+Recommended test scenarios:
+
+Patient: 47936476 (44yo male - good for cardiac risk)
+Message: "I have crushing chest pain radiating to my left arm. I'm sweating profusely."
+Expected: RAG retrieves Chest Pain protocol, Priority = EMERGENCY
+
+Patient: 47026052 (44yo female)
+Message: "I have the worst headache of my life. It came on like a thunderclap."
+Expected: RAG retrieves Headache protocol, Priority = EMERGENCY
+
+Patient: 47936371 (22yo male)
+Message: "I have abdominal pain that moved from my belly button to my lower right side."
+Expected: RAG retrieves Abdominal Pain protocol, Priority = URGENT/EMERGENCY
+
+
+# ================================================================
+# FINDING MORE PATIENTS
+# ================================================================
+
+To find additional patients on HAPI FHIR:
+curl "https://hapi.fhir.org/baseR4/Patient?_count=50" | jq '.entry[].resource | {id, name, gender, birthDate}'
+
+Or browse directly:
+https://hapi.fhir.org/baseR4/Patient?_pretty=true
+
+
+# ================================================================
+# PATIENT DATA AVAILABLE
+# ================================================================
+
+The FHIR API can retrieve:
+- Demographics (name, gender, birth date, address)
+- Conditions/Diagnoses
+- Medications
+- Allergies
+- Observations (vitals, labs)
+- Encounters (visits)
+
+Note: Not all patients have complete data in all categories.
+Patients with "Unknown" may have minimal FHIR resources.
+
+
+# ================================================================
+# QUICK COPY-PASTE PATIENT IDs
+# ================================================================
+
+47936371
+47936476
+47026052
+47077394
+47051312
+47936378
+47936493
+47936494
+
+
+# ================================================================
+# AGE-SPECIFIC TESTING
+# ================================================================
+
+For Pediatric Fever Testing (infant <3 months):
+Note: HAPI doesn't have infant test data, so test without patient_id
+curl -X POST "http://localhost:8002/api/v1/triage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "My 2-month-old baby has a fever of 100.5°F"
+  }'
+
+For Elderly Patients (>65 years):
+Use patients born before 1960 (if available in HAPI)
+
+
+# ================================================================
+# NOTES
+# ================================================================
+
+- HAPI FHIR is a public test server - data may change
+- Some patients may have limited FHIR resources
+- Patient 47936371 is consistently available and well-tested
+- For production, use your hospital's FHIR server URL
+- RAG works with or without patient_id (patient context is optional)

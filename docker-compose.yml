@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  fhir-chat-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fhir-chat-api
+    ports:
+      - "8002:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-3.5-turbo}
+      - FHIR_SERVER_URL=${FHIR_SERVER_URL:-https://hapi.fhir.org/baseR4}
+    env_file:
+      - .env
+    volumes:
+      # Mount code for development (comment out for production)
+      - ./main.py:/app/main.py
+      - ./config.py:/app/config.py
+      - ./fhir_client.py:/app/fhir_client.py
+      - ./chat_service.py:/app/chat_service.py
+      - ./models.py:/app/models.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fhir-network
+
+networks:
+  fhir-network:
+    driver: bridge

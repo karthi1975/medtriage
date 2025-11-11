@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Logs
+*.log
+
+# Database
+chroma_db/
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Test Results
+*_results.json
+*_comparison.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Course Documents (personal)
+*.pdf
+*.docx
+
+# Temporary files
+*.tmp
+*.bak
