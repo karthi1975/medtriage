@@ -59,6 +59,11 @@ class FHIRClient:
                 'telecom': self._format_telecom(patient.telecom) if hasattr(patient, 'telecom') else None
             }
 
+            # Parse extensions for allergies and conditions
+            extensions = self._parse_patient_extensions(patient)
+            if extensions:
+                patient_data.update(extensions)
+
             logger.info(f"Successfully retrieved patient {patient_id}")
             return patient_data
 
@@ -221,6 +226,42 @@ class FHIRClient:
         return patient_history
 
     # Helper methods for formatting FHIR data
+
+    def _parse_patient_extensions(self, patient) -> Dict[str, Any]:
+        """
+        Parse patient extensions for allergies and conditions
+
+        Args:
+            patient: FHIR Patient resource
+
+        Returns:
+            Dictionary with parsed extensions
+        """
+        extensions_data = {}
+
+        if not hasattr(patient, 'extension') or not patient.extension:
+            return extensions_data
+
+        allergies = []
+        conditions = []
+
+        for ext in patient.extension:
+            if hasattr(ext, 'url') and hasattr(ext, 'valueString'):
+                if 'patient-allergy' in ext.url:
+                    # Parse comma-separated allergies
+                    allergy_list = [a.strip() for a in ext.valueString.split(',')]
+                    allergies.extend(allergy_list)
+                elif 'patient-condition' in ext.url:
+                    # Parse comma-separated conditions
+                    condition_list = [c.strip() for c in ext.valueString.split(',')]
+                    conditions.extend(condition_list)
+
+        if allergies:
+            extensions_data['allergies_from_extensions'] = allergies
+        if conditions:
+            extensions_data['conditions_from_extensions'] = conditions
+
+        return extensions_data
 
     def _format_name(self, names) -> Optional[str]:
         """Format FHIR HumanName to string"""
