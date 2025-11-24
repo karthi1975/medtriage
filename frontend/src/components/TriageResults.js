@@ -17,7 +17,13 @@ const TriageResults = ({ triageData }) => {
     red_flags,
     recommendations,
     extracted_symptoms,
+    patient_context,
   } = triageData;
+
+  // Extract patient allergies and conditions from extensions
+  const patientData = patient_context?.patient;
+  const allergiesFromExtensions = patientData?.allergies_from_extensions || [];
+  const conditionsFromExtensions = patientData?.conditions_from_extensions || [];
 
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
@@ -74,6 +80,49 @@ const TriageResults = ({ triageData }) => {
         <h3>Assessment Reasoning</h3>
         <p>{reasoning}</p>
       </div>
+
+      {patientData && (
+        <div className="section patient-info">
+          <h3>Patient Information</h3>
+          <div className="patient-details">
+            {patientData.name && (
+              <p><strong>Name:</strong> {patientData.name}</p>
+            )}
+            {patientData.gender && (
+              <p><strong>Gender:</strong> {patientData.gender}</p>
+            )}
+            {patientData.birthDate && (
+              <p><strong>Birth Date:</strong> {patientData.birthDate}</p>
+            )}
+          </div>
+
+          {conditionsFromExtensions.length > 0 && (
+            <div className="patient-conditions">
+              <h4>⚕️ Known Conditions</h4>
+              <ul className="conditions-list">
+                {conditionsFromExtensions.map((condition, index) => (
+                  <li key={index} className="condition-item">
+                    {condition}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {allergiesFromExtensions.length > 0 && (
+            <div className="patient-allergies">
+              <h4>🚫 Known Allergies</h4>
+              <ul className="allergies-list">
+                {allergiesFromExtensions.map((allergy, index) => (
+                  <li key={index} className="allergy-item">
+                    {allergy}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       {extracted_symptoms && extracted_symptoms.length > 0 && (
         <div className="section">

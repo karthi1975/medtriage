@@ -199,3 +199,71 @@
   display: block;
   margin-bottom: 0.5rem;
 }
+
+/* Patient Information Section */
+.patient-info {
+  background-color: #e8f4f8;
+  border-left: 4px solid #007bff;
+}
+
+.patient-info h3 {
+  color: #004085;
+}
+
+.patient-details {
+  margin-bottom: 1.5rem;
+}
+
+.patient-details p {
+  color: #004085;
+  margin-bottom: 0.5rem;
+}
+
+.patient-conditions,
+.patient-allergies {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 6px;
+}
+
+.patient-conditions h4 {
+  color: #155724;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.patient-allergies h4 {
+  color: #721c24;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.conditions-list,
+.allergies-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.condition-item,
+.allergy-item {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.condition-item {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 3px solid #28a745;
+}
+
+.allergy-item {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 3px solid #dc3545;
+}
