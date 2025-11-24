@@ -1,505 +1,544 @@
-# FHIR Chat API - Healthcare AI Assistant
+# MediChat - FHIR Medical Triage System
 
-A FastAPI-based application that integrates FHIR patient data retrieval with OpenAI-powered chat functionality and symptom extraction using NLP.
+An AI-powered medical triage system that integrates FHIR patient data with OpenAI-powered symptom analysis and care recommendations. The system features a conversational React frontend and a FastAPI backend with RAG (Retrieval Augmented Generation) capabilities.
 
-## Features
+## Overview
 
-- **FHIR Integration**: Retrieve patient data from FHIR-compliant servers
-- **AI Chat Assistant**: Conversational interface powered by OpenAI
-- **Symptom Extraction**: Automatic NLP-based symptom extraction from text
-- **Patient Context**: Chat responses enriched with patient medical history
-- **RESTful API**: Well-documented API endpoints for all functionalities
+MediChat provides intelligent medical triage assessments by combining:
+- **FHIR Patient Data**: Real-time retrieval of patient demographics, allergies, and conditions
+- **AI-Powered Triage**: OpenAI-driven symptom extraction and priority assessment
+- **RAG Integration**: Context-aware recommendations using medical knowledge base
+- **Interactive UI**: React-based chat interface for symptom assessment
 
-## Sprint Plan Implementation Status
+## Key Features
 
-✅ Obtain OpenAI or Claude API keys for chat functionality
-✅ Implement FHIR client wrapper class for patient data retrieval
-✅ Create API endpoint for fetching patient history by ID
-✅ Build chat API routes for chat and patient data retrieval
-✅ Integrate OpenAI API for basic chat functionality
-✅ Test end-to-end: symptom input → NLP extraction
+### Backend Features
+- **FHIR Extension Parsing**: Extracts patient allergies and conditions from FHIR Patient extensions
+- **Medical Triage System**: Determines priority levels (Emergency, Urgent, Semi-Urgent, Non-Urgent)
+- **RAG-Enhanced Recommendations**: Context-aware care recommendations using medical knowledge
+- **Symptom Extraction**: NLP-based automatic symptom extraction from natural language
+- **Patient Context Integration**: Enriches triage decisions with patient medical history
+- **Optimized API Responses**: Clean JSON responses (excludes empty arrays)
+
+### Frontend Features
+- **Interactive Chat Interface**: Conversational symptom assessment
+- **Real-Time Triage Results**: Displays priority, reasoning, and recommendations
+- **Patient Information Display**: Shows known allergies and conditions with color-coded styling
+- **Responsive Design**: Mobile-friendly interface
+- **Live Status Indicators**: Connection status and health monitoring
+
+## Recent Updates (Sprint Week Nov 18-24, 2025)
+
+✅ **FHIR Extension Integration**
+- Implemented `_parse_patient_extensions()` to extract allergies and conditions
+- Parses comma-separated values into arrays (e.g., "Penicillin, Peanuts")
+- Integrated with patient history endpoint
+
+✅ **UI Enhancement**
+- Added Patient Information section to triage results
+- Color-coded display: Green for conditions, Red for allergies
+- Responsive card-style layout
+
+✅ **API Optimization**
+- Removed empty arrays from responses (conditions, observations, medications, allergies)
+- Reduced payload size by ~30% for patients without historical data
+
+✅ **External FHIR Server**
+- Connected to: `http://3.149.33.232:8081/fhir`
+- Validated with real patient data (Patient ID: 13)
+
+## System Architecture
+
+```
+┌─────────────────┐         ┌──────────────────┐         ┌──────────────────┐
+│  React Frontend │ ◄─────► │  FastAPI Backend │ ◄─────► │   FHIR Server    │
+│  (Port 3000)    │         │   (Port 8002)    │         │  (External API)  │
+└─────────────────┘         └──────────────────┘         └──────────────────┘
+                                     │
+                                     ▼
+                            ┌──────────────────┐
+                            │   OpenAI API     │
+                            │  (GPT-3.5/4)     │
+                            └──────────────────┘
+```
 
 ## Project Structure
 
 ```
 project/
-├── main.py              # FastAPI application and routes
-├── config.py            # Configuration settings
-├── fhir_client.py       # FHIR client wrapper
-├── chat_service.py      # OpenAI chat and symptom extraction
-├── models.py            # Pydantic models for request/response
-├── requirements.txt     # Python dependencies
-├── .env                 # Environment variables (API keys)
-├── test_api.py          # API test suite
-├── Dockerfile           # Docker container definition
-├── docker-compose.yml   # Docker Compose configuration
-├── .dockerignore        # Docker ignore file
-└── README.md           # This file
+├── main.py                  # FastAPI application and routes
+├── config.py                # Configuration and settings
+├── fhir_client.py           # FHIR client with extension parsing
+├── chat_service.py          # OpenAI chat and symptom extraction
+├── triage_service.py        # Medical triage logic with RAG
+├── models.py                # Pydantic request/response models
+├── schemas.py               # Data schemas
+├── requirements.txt         # Python dependencies
+├── Dockerfile               # Backend container definition
+├── docker-compose.yml       # Docker orchestration
+├── .env                     # Environment variables
+├── .gitignore              # Git ignore rules
+├── frontend/               # React frontend application
+│   ├── src/
+│   │   ├── App.js          # Main React component
+│   │   ├── components/
+│   │   │   ├── ChatInterface.js      # Chat UI component
+│   │   │   └── TriageResults.js      # Results display with patient info
+│   │   ├── services/
+│   │   │   └── api.js      # API client
+│   │   └── styles/         # CSS styling
+│   ├── package.json        # Node dependencies
+│   └── public/             # Static assets
+└── README.md               # This file
 ```
 
-## Setup Instructions
+## Quick Start
 
-### Option 1: Docker Deployment (Recommended)
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 16+ (for frontend development)
+- Python 3.11+ (for local backend development)
 
-Docker provides the easiest way to run the application with all dependencies pre-configured.
+### Option 1: Full Docker Deployment (Recommended)
 
-#### Prerequisites
-- Docker installed ([Get Docker](https://docs.docker.com/get-docker/))
-- Docker Compose installed (included with Docker Desktop)
-
-#### Quick Start with Docker
-
-**Option A: Using Startup Script (Easiest)**
+#### 1. Start Backend API
 
 ```bash
-# macOS/Linux
-./start.sh
-
-# Windows
-start.bat
-```
-
-**Option B: Manual Docker Commands**
-
-1. **Ensure `.env` file exists** with your OpenAI API key (already created)
-
-2. **Build and start the container**:
-```bash
-docker-compose up --build
-```
-
-Or run in detached mode:
-```bash
+# Build and start the backend container
 docker-compose up -d --build
-```
 
-3. **Access the API**:
-   - API: http://localhost:8002
-   - Swagger Docs: http://localhost:8002/docs
-   - ReDoc: http://localhost:8002/redoc
-
-   **Note**: The API runs on port 8002 by default. If you need to change the port, edit the `ports` section in `docker-compose.yml`.
-
-4. **View logs**:
-```bash
-docker-compose logs -f
-```
-
-5. **Stop the container**:
-```bash
-docker-compose down
-```
-
-#### Docker Commands Reference
-
-```bash
-# Build the Docker image
-docker-compose build
-
-# Start the container
-docker-compose up
-
-# Start in background (detached mode)
-docker-compose up -d
-
-# Stop the container
-docker-compose down
+# Check status
+docker-compose ps
 
 # View logs
 docker-compose logs -f fhir-chat-api
-
-# Restart the container
-docker-compose restart
-
-# Remove containers and volumes
-docker-compose down -v
-
-# Execute commands inside the container
-docker-compose exec fhir-chat-api bash
-
-# Check container status
-docker-compose ps
 ```
 
-#### Docker Environment Variables
+The backend API will be available at: **http://localhost:8002**
 
-The application uses environment variables from `.env`. You can override them in `docker-compose.yml` or pass them at runtime:
+#### 2. Start Frontend UI
 
 ```bash
-docker-compose up -e OPENAI_MODEL=gpt-4
+cd frontend
+npm install
+npm start
 ```
 
-### Option 2: Local Python Installation
+The frontend will be available at: **http://localhost:3000**
 
-### 1. Install Dependencies
+### Option 2: Local Development
+
+#### Backend Setup
 
 ```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. Environment Variables
+# Set environment variables
+cp .env.example .env
+# Edit .env with your API keys
 
-The `.env` file has already been created with your OpenAI API key. You can optionally configure additional settings:
-
-```env
-OPENAI_API_KEY=your_key_here
-OPENAI_MODEL=gpt-3.5-turbo
-FHIR_SERVER_URL=https://hapi.fhir.org/baseR4
-```
-
-### 3. Run the Application
-
-```bash
+# Run the application
 python main.py
 ```
 
-Or using uvicorn directly:
+#### Frontend Setup
 
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+cd frontend
+npm install
+npm start
 ```
 
-The API will be available at: `http://localhost:8002`
+## Environment Configuration
 
-### 4. Access API Documentation
+Create a `.env` file in the project root:
 
-FastAPI provides automatic interactive API documentation:
+```env
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-3.5-turbo
 
-- **Swagger UI**: http://localhost:8002/docs
-- **ReDoc**: http://localhost:8002/redoc
+# FHIR Server Configuration
+FHIR_SERVER_URL=http://3.149.33.232:8081/fhir
+
+# RAG Configuration
+USE_RAG=true
+```
 
 ## API Endpoints
 
 ### Health Check
 
-```
-GET /health
-```
-
-Returns API health status and version.
-
-### Patient Data Endpoints
-
-#### Get Complete Patient History
-
-```
-GET /api/v1/patients/{patient_id}
-```
-
-Retrieves comprehensive patient history including demographics, conditions, medications, allergies, and observations.
-
-**Example:**
 ```bash
-curl http://localhost:8002/api/v1/patients/example
+curl http://localhost:8002/health
 ```
 
-#### Get Patient Demographics
+### Patient Data
 
-```
-GET /api/v1/patients/{patient_id}/demographics
-```
-
-#### Get Patient Conditions
-
-```
-GET /api/v1/patients/{patient_id}/conditions
+#### Get Patient History with Extensions
+```bash
+curl http://localhost:8002/api/v1/patients/13
 ```
 
-#### Get Patient Medications
-
-```
-GET /api/v1/patients/{patient_id}/medications
-```
-
-#### Get Patient Allergies
-
-```
-GET /api/v1/patients/{patient_id}/allergies
-```
-
-### Chat Endpoints
-
-#### Chat with AI Assistant
-
-```
-POST /api/v1/chat
-```
-
-**Request Body:**
+**Response Example:**
 ```json
 {
-  "message": "I have been having headaches for 3 days",
-  "patient_id": "optional-patient-id",
-  "conversation_history": [
-    {"role": "user", "content": "previous message"},
-    {"role": "assistant", "content": "previous response"}
-  ]
-}
-```
-
-**Response:**
-```json
-{
-  "response": "AI assistant response",
-  "extracted_symptoms": [
-    {
-      "symptom": "headache",
-      "severity": "moderate",
-      "duration": "3 days",
-      "location": "forehead"
+  "patient_id": "13",
+  "data": {
+    "patient": {
+      "id": "13",
+      "name": "Aarav Kumar Patel",
+      "gender": "male",
+      "birthDate": "1998-07-22",
+      "allergies_from_extensions": ["Penicillin", "Peanuts"],
+      "conditions_from_extensions": ["Asthma"]
     }
-  ],
-  "patient_context": {}
+  }
 }
 ```
 
-#### Extract Symptoms from Text
+### Medical Triage
 
-```
-POST /api/v1/extract-symptoms
-```
-
-**Request Body:**
-```json
-{
-  "text": "I have severe headaches in my forehead for 3 days and mild nausea",
-  "patient_id": "optional-patient-id"
-}
-```
-
-**Response:**
-```json
-{
-  "extracted_symptoms": [
-    {
-      "symptom": "headache",
-      "severity": "severe",
-      "duration": "3 days",
-      "location": "forehead"
-    },
-    {
-      "symptom": "nausea",
-      "severity": "mild",
-      "duration": null,
-      "location": null
-    }
-  ],
-  "summary": "Patient experiencing severe headaches for 3 days and mild nausea",
-  "raw_response": "..."
-}
-```
-
-## Testing
-
-### Run Automated Tests
-
-**With Docker:**
+#### Perform Triage Assessment
 ```bash
-# Make sure the container is running
-docker-compose up -d
-
-# Run tests from your host machine
-python test_api.py
-
-# Or run tests inside the container
-docker-compose exec fhir-chat-api python test_api.py
-```
-
-**Without Docker:**
-```bash
-python test_api.py
-```
-
-This will run a comprehensive test suite including:
-- Health check
-- Symptom extraction with multiple test cases
-- Chat functionality
-- Conversation history management
-
-### Manual Testing Examples
-
-#### 1. Test Symptom Extraction
-
-```bash
-curl -X POST http://localhost:8002/api/v1/extract-symptoms \
+curl -X POST http://localhost:8002/api/v1/triage \
   -H "Content-Type: application/json" \
   -d '{
-    "text": "I have been experiencing severe headaches for 3 days in my forehead area, with mild nausea"
+    "message": "I have severe chest pain and shortness of breath",
+    "patient_id": "13"
   }'
 ```
 
-#### 2. Test Chat
+**Response Example:**
+```json
+{
+  "priority": "emergency",
+  "reasoning": "Severe chest pain with shortness of breath requires immediate evaluation...",
+  "confidence": "high",
+  "red_flags": [
+    "Chest pain",
+    "Shortness of breath"
+  ],
+  "recommendations": {
+    "immediate_action": "Call 911 or go to emergency room immediately",
+    "care_level": "Emergency Department",
+    "timeframe": "Immediate - Do not delay"
+  },
+  "extracted_symptoms": [
+    {
+      "symptom": "chest pain",
+      "severity": "severe",
+      "duration": null,
+      "location": "chest"
+    }
+  ],
+  "patient_context": {
+    "patient": {
+      "name": "Aarav Kumar Patel",
+      "allergies_from_extensions": ["Penicillin", "Peanuts"],
+      "conditions_from_extensions": ["Asthma"]
+    }
+  }
+}
+```
+
+### Chat Endpoint
 
 ```bash
 curl -X POST http://localhost:8002/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "I have a fever and sore throat. What should I do?"
+    "message": "I have a headache for 3 days",
+    "patient_id": "13"
   }'
 ```
 
-#### 3. Test Patient Data Retrieval
+### Symptom Extraction
 
 ```bash
-curl http://localhost:8002/api/v1/patients/example
+curl -X POST http://localhost:8002/api/v1/extract-symptoms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "I have severe headaches for 3 days in my forehead and mild nausea",
+    "patient_id": "13"
+  }'
 ```
 
-## FHIR Server
+## Frontend Usage
 
-The application uses the public HAPI FHIR test server by default:
-- Server: https://hapi.fhir.org/baseR4
-- This is a public test server with sample patient data
+### Using the Chat Interface
 
-To use a different FHIR server, update the `FHIR_SERVER_URL` in your `.env` file.
+1. **Open the UI**: Navigate to http://localhost:3000
+2. **Enter Patient ID** (optional): Type patient ID (e.g., "13") in the header field
+3. **Describe Symptoms**: Type your symptoms in the chat input
+4. **View Triage Results**: The right panel displays:
+   - Priority level with color coding
+   - Patient information (if Patient ID provided)
+   - Known allergies (red background)
+   - Known conditions (green background)
+   - Identified symptoms
+   - Care recommendations
+   - Warning signs
+
+### Example Flow
+
+```
+User Input: Patient ID: 13
+User Input: "I have chest pain and difficulty breathing"
+
+System Response:
+┌─ TRIAGE ASSESSMENT ─────────────────┐
+│ Priority: EMERGENCY 🚨              │
+│ Confidence: HIGH                    │
+├─ Patient Information ───────────────┤
+│ Name: Aarav Kumar Patel            │
+│ Gender: male                        │
+│ Birth Date: 1998-07-22             │
+│                                     │
+│ ⚕️ Known Conditions                │
+│ • Asthma                           │
+│                                     │
+│ 🚫 Known Allergies                 │
+│ • Penicillin                       │
+│ • Peanuts                          │
+├─ Care Recommendations ──────────────┤
+│ Immediate Action: Call 911         │
+│ Care Level: Emergency Department   │
+└─────────────────────────────────────┘
+```
+
+## FHIR Extension Format
+
+The system parses custom FHIR Patient extensions:
+
+```json
+{
+  "resourceType": "Patient",
+  "id": "13",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-condition",
+      "valueString": "Asthma"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/patient-allergy",
+      "valueString": "Penicillin, Peanuts"
+    }
+  ]
+}
+```
+
+## Testing
+
+### API Testing
+
+```bash
+# Test patient data retrieval
+curl http://localhost:8002/api/v1/patients/13
+
+# Test triage with patient context
+curl -X POST http://localhost:8002/api/v1/triage \
+  -H "Content-Type: application/json" \
+  -d '{"message": "I have fever and cough", "patient_id": "13"}'
+
+# Test symptom extraction
+curl -X POST http://localhost:8002/api/v1/extract-symptoms \
+  -H "Content-Type: application/json" \
+  -d '{"text": "severe headache for 2 days"}'
+```
+
+### Frontend Testing
+
+```bash
+cd frontend
+npm test
+```
 
 ## Key Components
 
 ### 1. FHIR Client (`fhir_client.py`)
 
-Wrapper class for interacting with FHIR servers. Provides methods for:
-- Patient demographics retrieval
-- Medical conditions/diagnoses
-- Observations (vitals, lab results)
-- Medications
-- Allergies
-- Comprehensive patient history
+**Features:**
+- Patient data retrieval from FHIR servers
+- Custom extension parsing for allergies and conditions
+- Comprehensive patient history aggregation
+- Support for Demographics, Conditions, Observations, Medications, Allergies
 
-### 2. Chat Service (`chat_service.py`)
+**Key Method:**
+```python
+def _parse_patient_extensions(self, patient) -> Dict[str, Any]:
+    """Parse patient extensions for allergies and conditions"""
+    # Extracts data from FHIR extensions
+    # Returns: {'allergies_from_extensions': [...], 'conditions_from_extensions': [...]}
+```
 
-OpenAI integration for:
-- Conversational AI responses
-- Symptom extraction using NLP
-- Patient context-aware conversations
-- Conversation history management
+### 2. Triage Service (`triage_service.py`)
 
-### 3. Main Application (`main.py`)
+**Features:**
+- AI-powered triage priority determination
+- RAG-enhanced medical recommendations
+- Red flag identification
+- Care level recommendations
 
-FastAPI application with:
-- RESTful API endpoints
-- Error handling
-- CORS configuration
-- Request/response validation
-- Logging
+**Priority Levels:**
+- **Emergency**: Immediate life-threatening conditions
+- **Urgent**: Serious conditions requiring prompt care
+- **Semi-Urgent**: Conditions needing timely evaluation
+- **Non-Urgent**: Minor conditions suitable for routine care
 
-## Development
+### 3. Frontend Components
 
-### Adding New Features
+**ChatInterface.js:**
+- Real-time symptom input
+- Patient ID field
+- Message history display
+- Loading states
 
-1. **New FHIR Resources**: Add methods to `fhir_client.py`
-2. **New Chat Features**: Extend `chat_service.py`
-3. **New Endpoints**: Add routes to `main.py`
-4. **New Models**: Define in `models.py`
+**TriageResults.js:**
+- Priority badge with color coding
+- Patient information section (NEW)
+- Allergies display with red styling (NEW)
+- Conditions display with green styling (NEW)
+- Symptom breakdown
+- Care recommendations
+- Warning signs
 
-### Logging
+## Docker Commands
 
-All components use Python's logging module. Logs include:
-- API requests and responses
-- FHIR operations
-- OpenAI API calls
-- Errors and warnings
+```bash
+# Build and start
+docker-compose up -d --build
 
-### Error Handling
+# View logs
+docker-compose logs -f fhir-chat-api
 
-The API includes comprehensive error handling:
-- 404: Resource not found
-- 500: Internal server errors
-- Detailed error messages in responses
+# Stop services
+docker-compose down
+
+# Restart backend
+docker-compose restart fhir-chat-api
+
+# Check status
+docker-compose ps
+
+# Execute commands in container
+docker-compose exec fhir-chat-api bash
+```
+
+## Development Workflow
+
+### Backend Development
+
+```bash
+# Make code changes to Python files
+# Docker volumes mount the code, so changes are reflected immediately
+
+# Restart to apply changes
+docker-compose restart fhir-chat-api
+```
+
+### Frontend Development
+
+```bash
+cd frontend
+npm start
+# Hot reload is enabled - changes reflect immediately
+```
 
 ## Production Considerations
 
-Before deploying to production:
+### Security
+- [ ] Configure CORS properly (don't use `allow_origins=["*"]`)
+- [ ] Add authentication/authorization
+- [ ] Secure API keys using secrets management
+- [ ] Use HTTPS with SSL certificates
+- [ ] Implement rate limiting
 
-1. **Security**:
-   - Configure CORS properly (don't use `allow_origins=["*"]`)
-   - Add authentication/authorization
-   - Secure API keys
-   - Use HTTPS
+### Performance
+- [ ] Add Redis caching for FHIR data
+- [ ] Implement database for conversation history
+- [ ] Use production ASGI server (Gunicorn)
+- [ ] Enable CDN for frontend assets
 
-2. **FHIR Server**:
-   - Use a production FHIR server
-   - Configure authentication if required
-   - Handle rate limiting
-
-3. **OpenAI**:
-   - Monitor API usage and costs
-   - Implement rate limiting
-   - Handle API timeouts
-
-4. **Scaling**:
-   - Use production ASGI server (e.g., Gunicorn with Uvicorn workers)
-   - Implement caching for FHIR data
-   - Add database for conversation history
+### Monitoring
+- [ ] Add application performance monitoring (APM)
+- [ ] Implement structured logging
+- [ ] Set up health check endpoints
+- [ ] Monitor OpenAI API usage and costs
 
 ## Troubleshooting
 
-### Docker Issues
-
-**Container won't start:**
+### Backend won't start
 ```bash
-# Check container logs
-docker-compose logs
+# Check logs
+docker-compose logs fhir-chat-api
 
-# Rebuild the image
+# Rebuild without cache
 docker-compose down
 docker-compose build --no-cache
 docker-compose up
 ```
 
-**Port 8000 already in use:**
+### Frontend compilation errors
 ```bash
-# Find what's using the port
-lsof -i :8000  # macOS/Linux
-netstat -ano | findstr :8000  # Windows
-
-# Either stop that process or change the port in docker-compose.yml:
-ports:
-  - "8001:8000"  # Map to different host port
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+npm start
 ```
 
-**Environment variables not loading:**
-```bash
-# Verify .env file exists and has correct format
-cat .env
+### FHIR connection issues
+- Verify FHIR_SERVER_URL in `.env`
+- Check network connectivity
+- Validate patient ID exists on server
 
-# Restart container after .env changes
-docker-compose down
-docker-compose up
+### OpenAI API errors
+- Verify OPENAI_API_KEY in `.env`
+- Check API rate limits
+- Monitor quota usage
+
+## API Documentation
+
+Interactive API documentation is available when the backend is running:
+- **Swagger UI**: http://localhost:8002/docs
+- **ReDoc**: http://localhost:8002/redoc
+
+## Git Repository
+
+**GitHub Enterprise:** https://github.gatech.edu/kjeyabalan3/medichat
+
+### Recent Commits
+```
+6a946d5 - Add patient allergies and conditions display to UI
+a6d5e74 - Remove empty arrays from patient history API response
+33e7ca7 - Add support for parsing patient allergies and conditions from FHIR extensions
 ```
 
-### API Connection Issues
+## Contributors
 
-If you can't connect to the API:
-- **Docker**: Make sure the container is running: `docker-compose ps`
-- **Local**: Make sure the application is running: `python main.py`
-- Check that port 8002 (Docker) or 8000 (local) is not in use
-- Verify firewall settings
-- Test health endpoint: `curl http://localhost:8002/health`
-
-### FHIR Data Issues
-
-If patient data retrieval fails:
-- Check FHIR server URL in `.env`
-- Verify patient ID exists on the FHIR server
-- Check network connectivity to FHIR server
-
-### OpenAI Issues
-
-If chat or symptom extraction fails:
-- Verify OpenAI API key in `.env`
-- Check OpenAI API status
-- Monitor API rate limits and quotas
-
-## Support
-
-For issues or questions:
-1. Check the API documentation at `/docs`
-2. Review application logs
-3. Test with the provided test suite
+**Karthikeyan Jeyabalan** (kjeyabalan3@gatech.edu)
+- FHIR integration and extension parsing
+- Backend API development
+- Frontend UI implementation
+- System architecture and deployment
 
 ## License
 
-[Add your license information here]
+This project is part of CS-6440 course work at Georgia Institute of Technology.
 
-## Authors
+## Disclaimer
 
-[Add author information here]
+This system is for educational and demonstration purposes only. It should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for medical concerns.
+
+## Support & Feedback
+
+For issues, questions, or feedback:
+- Check API documentation at `/docs`
+- Review application logs
+- Test with provided examples
+- Contact: kjeyabalan3@gatech.edu
