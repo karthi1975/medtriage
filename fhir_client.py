@@ -216,12 +216,25 @@ class FHIRClient:
         logger.info(f"Retrieving complete history for patient {patient_id}")
 
         patient_history = {
-            'patient': self.get_patient(patient_id),
-            'conditions': self.get_patient_conditions(patient_id),
-            'observations': self.get_patient_observations(patient_id),
-            'medications': self.get_patient_medications(patient_id),
-            'allergies': self.get_patient_allergies(patient_id)
+            'patient': self.get_patient(patient_id)
         }
+
+        # Only include non-empty arrays
+        conditions = self.get_patient_conditions(patient_id)
+        if conditions:
+            patient_history['conditions'] = conditions
+
+        observations = self.get_patient_observations(patient_id)
+        if observations:
+            patient_history['observations'] = observations
+
+        medications = self.get_patient_medications(patient_id)
+        if medications:
+            patient_history['medications'] = medications
+
+        allergies = self.get_patient_allergies(patient_id)
+        if allergies:
+            patient_history['allergies'] = allergies
 
         return patient_history
 
