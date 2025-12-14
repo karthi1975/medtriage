@@ -1,0 +1,241 @@
+services:
+  # ============================================
+  # HAPI FHIR SERVER (Local FHIR R4 Server)
+  # ============================================
+  hapi-fhir:
+    image: hapiproject/hapi:latest
+    container_name: hapi-fhir-server
+    ports:
+      - "8081:8080"
+    environment:
+      # Database configuration
+      - spring.datasource.url=jdbc:postgresql://postgres-fhir:5432/hapi_fhir
+      - spring.datasource.username=hapiuser
+      - spring.datasource.password=hapipassword
+      - spring.datasource.driverClassName=org.postgresql.Driver
+
+      # JPA configuration
+      - spring.jpa.properties.hibernate.dialect=ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      - spring.jpa.properties.hibernate.search.enabled=false
+
+      # FHIR configuration
+      - hapi.fhir.fhir_version=R4
+      - hapi.fhir.subscription.resthook_enabled=false
+      - hapi.fhir.subscription.email.enabled=false
+      - hapi.fhir.subscription.websocket_enabled=false
+
+      # Server configuration
+      - hapi.fhir.server_address=http://localhost:8081/fhir
+      - hapi.fhir.allow_external_references=true
+      - hapi.fhir.allow_multiple_delete=true
+      - hapi.fhir.allow_placeholder_references=true
+
+      # Performance tuning
+      - hapi.fhir.bulk_export_enabled=false
+      - hapi.fhir.cors.allowed_origin=*
+
+      # JVM configuration
+      - JAVA_OPTS=-Xmx2g -Xms1g
+    depends_on:
+      postgres-fhir:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/fhir/metadata"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - medichat-network
+    volumes:
+      - hapi-data:/data/hapi
+
+  # ============================================
+  # POSTGRESQL FOR HAPI FHIR
+  # ============================================
+  postgres-fhir:
+    image: postgres:15-alpine
+    container_name: postgres-fhir-db
+    environment:
+      - POSTGRES_DB=hapi_fhir
+      - POSTGRES_USER=hapiuser
+      - POSTGRES_PASSWORD=hapipassword
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hapiuser -d hapi_fhir"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - medichat-network
+    volumes:
+      - postgres-fhir-data:/var/lib/postgresql/data
+
+  # ============================================
+  # POSTGRESQL FOR TRIBAL KNOWLEDGE
+  # ============================================
+  postgres-tribal:
+    image: postgres:15-alpine
+    container_name: postgres-tribal-db
+    environment:
+      - POSTGRES_DB=tribal_knowledge
+      - POSTGRES_USER=tribaluser
+      - POSTGRES_PASSWORD=tribalpassword
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tribaluser -d tribal_knowledge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - medichat-network
+    volumes:
+      - postgres-tribal-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+
+  # ============================================
+  # PGADMIN (Database Administration - DEV ONLY)
+  # ============================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@medichat.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-fhir
+      - postgres-tribal
+    restart: unless-stopped
+    networks:
+      - medichat-network
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    profiles:
+      - dev  # Only starts when --profile dev is specified
+
+  # ============================================
+  # BACKEND API (Enhanced with Scheduling)
+  # ============================================
+  fhir-chat-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fhir-chat-api
+    ports:
+      - "8002:8000"
+    environment:
+      # OpenAI Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-3.5-turbo}
+
+      # FHIR Server Configuration (LOCAL)
+      - FHIR_SERVER_URL=http://hapi-fhir:8080/fhir
+
+      # Tribal Knowledge Database
+      - TRIBAL_DB_HOST=postgres-tribal
+      - TRIBAL_DB_PORT=5432
+      - TRIBAL_DB_NAME=tribal_knowledge
+      - TRIBAL_DB_USER=tribaluser
+      - TRIBAL_DB_PASSWORD=tribalpassword
+
+      # RAG Configuration
+      - USE_RAG=true
+
+      # Chat Configuration
+      - CHAT_HISTORY_LIMIT=${CHAT_HISTORY_LIMIT:-10}
+      - MAX_TOKENS=${MAX_TOKENS:-1500}
+      - TEMPERATURE=${TEMPERATURE:-0.7}
+      - TOP_P=${TOP_P:-1.0}
+      - FREQUENCY_PENALTY=${FREQUENCY_PENALTY:-0.0}
+      - PRESENCE_PENALTY=${PRESENCE_PENALTY:-0.0}
+    env_file:
+      - .env
+    volumes:
+      # Mount code for development (comment out for production)
+      - ./main.py:/app/main.py
+      - ./config.py:/app/config.py
+      - ./fhir_client.py:/app/fhir_client.py
+      - ./chat_service.py:/app/chat_service.py
+      - ./triage_service.py:/app/triage_service.py
+      - ./rag_service.py:/app/rag_service.py
+      - ./models.py:/app/models.py
+      - ./schemas.py:/app/schemas.py
+      # NEW: Scheduling and tribal knowledge modules
+      - ./scheduling_service.py:/app/scheduling_service.py
+      - ./scheduling_schemas.py:/app/scheduling_schemas.py
+      - ./tribal_knowledge_service.py:/app/tribal_knowledge_service.py
+      - ./fhir_appointment_builder.py:/app/fhir_appointment_builder.py
+      - ./database:/app/database
+      # ChromaDB persistence
+      - ./chroma_db:/app/chroma_db
+    depends_on:
+      hapi-fhir:
+        condition: service_healthy
+      postgres-tribal:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - medichat-network
+
+  # ============================================
+  # FRONTEND (Enhanced with Scheduling UI)
+  # ============================================
+  fhir-chat-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # API URL will be proxied through nginx, so use relative path
+        REACT_APP_API_URL: ""
+    container_name: fhir-chat-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - fhir-chat-api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - medichat-network
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  medichat-network:
+    driver: bridge
+    name: medichat-network
+
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  hapi-data:
+    name: medichat-hapi-data
+  postgres-fhir-data:
+    name: medichat-postgres-fhir-data
+  postgres-tribal-data:
+    name: medichat-postgres-tribal-data
+  pgadmin-data:
+    name: medichat-pgadmin-data

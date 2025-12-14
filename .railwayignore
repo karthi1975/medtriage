@@ -1,0 +1,79 @@
+# Files and directories to ignore during Railway deployment
+
+# Development files
+*.md
+!README.md
+!RAILWAY_QUICK_START.md
+
+# Documentation
+docs/
+*.pdf
+
+# Environment files (use Railway's environment variables instead)
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker (not needed on Railway)
+docker-compose*.yml
+Dockerfile.dev
+.dockerignore
+
+# Test files
+test_*.py
+*_test.py
+tests/
+test/
+
+# Data files (unless needed)
+*.csv
+*.json
+data/
+tmp/
+
+# Logs
+*.log
+logs/
+
+# Frontend build (if deploying separately)
+frontend/node_modules/
+frontend/build/
+frontend/.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.bak
+*.swp

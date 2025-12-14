@@ -1,0 +1,571 @@
+{
+  "specialties": [
+    {
+      "id": 1,
+      "name": "Family Medicine",
+      "snomed_code": "419772000",
+      "description": "Primary care for patients of all ages",
+      "common_conditions": [
+        {"code": "I10", "display": "Essential hypertension"},
+        {"code": "E11.9", "display": "Type 2 diabetes mellitus"},
+        {"code": "J06.9", "display": "Acute upper respiratory infection"},
+        {"code": "M79.3", "display": "Low back pain"},
+        {"code": "K21.9", "display": "Gastroesophageal reflux disease"},
+        {"code": "E78.5", "display": "Hyperlipidemia"},
+        {"code": "J45.9", "display": "Asthma"},
+        {"code": "F41.9", "display": "Anxiety disorder"},
+        {"code": "R50.9", "display": "Fever"},
+        {"code": "N39.0", "display": "Urinary tract infection"}
+      ],
+      "common_procedures": [
+        "Annual physical exam",
+        "Well-child visit",
+        "Immunizations",
+        "Blood pressure monitoring",
+        "Diabetes management"
+      ],
+      "typical_patient_ages": [0, 100],
+      "visit_duration_minutes": {"new": 30, "followup": 15}
+    },
+    {
+      "id": 2,
+      "name": "Cardiology",
+      "snomed_code": "394579002",
+      "description": "Diagnosis and treatment of heart conditions",
+      "common_conditions": [
+        {"code": "I25.10", "display": "Atherosclerotic heart disease"},
+        {"code": "I48.91", "display": "Atrial fibrillation"},
+        {"code": "I50.9", "display": "Heart failure"},
+        {"code": "I20.9", "display": "Angina pectoris"},
+        {"code": "I10", "display": "Essential hypertension"},
+        {"code": "I25.5", "display": "Ischemic cardiomyopathy"},
+        {"code": "I21.9", "display": "Acute myocardial infarction"},
+        {"code": "I35.0", "display": "Aortic valve stenosis"},
+        {"code": "I42.0", "display": "Dilated cardiomyopathy"},
+        {"code": "I47.1", "display": "Supraventricular tachycardia"}
+      ],
+      "common_procedures": [
+        "ECG/EKG",
+        "Echocardiogram",
+        "Stress test",
+        "Cardiac catheterization",
+        "Pacemaker check"
+      ],
+      "typical_patient_ages": [40, 90],
+      "visit_duration_minutes": {"new": 45, "followup": 20}
+    },
+    {
+      "id": 3,
+      "name": "Orthopedics",
+      "snomed_code": "394801008",
+      "description": "Treatment of musculoskeletal system conditions",
+      "common_conditions": [
+        {"code": "M17.0", "display": "Bilateral primary osteoarthritis of knee"},
+        {"code": "M16.0", "display": "Bilateral primary osteoarthritis of hip"},
+        {"code": "S52.9", "display": "Fracture of forearm"},
+        {"code": "M75.1", "display": "Rotator cuff tear"},
+        {"code": "M54.5", "display": "Low back pain"},
+        {"code": "M23.9", "display": "Internal derangement of knee"},
+        {"code": "S83.5", "display": "Sprain and strain of knee"},
+        {"code": "M25.5", "display": "Pain in joint"},
+        {"code": "M51.2", "display": "Intervertebral disc displacement"},
+        {"code": "M19.90", "display": "Osteoarthritis"}
+      ],
+      "common_procedures": [
+        "X-ray",
+        "MRI",
+        "Joint injection",
+        "Physical therapy evaluation",
+        "Fracture reduction"
+      ],
+      "typical_patient_ages": [18, 85],
+      "visit_duration_minutes": {"new": 30, "followup": 15}
+    },
+    {
+      "id": 4,
+      "name": "Dermatology",
+      "snomed_code": "394582007",
+      "description": "Diagnosis and treatment of skin conditions",
+      "common_conditions": [
+        {"code": "L70.0", "display": "Acne vulgaris"},
+        {"code": "L20.9", "display": "Atopic dermatitis"},
+        {"code": "L40.9", "display": "Psoriasis"},
+        {"code": "L21.9", "display": "Seborrheic dermatitis"},
+        {"code": "L50.9", "display": "Urticaria"},
+        {"code": "L82.1", "display": "Seborrheic keratosis"},
+        {"code": "L57.0", "display": "Actinic keratosis"},
+        {"code": "B35.9", "display": "Tinea infection"},
+        {"code": "L30.9", "display": "Dermatitis"},
+        {"code": "D22.9", "display": "Melanocytic nevi"}
+      ],
+      "common_procedures": [
+        "Skin biopsy",
+        "Cryotherapy",
+        "Lesion excision",
+        "Phototherapy",
+        "Patch testing"
+      ],
+      "typical_patient_ages": [0, 100],
+      "visit_duration_minutes": {"new": 20, "followup": 10}
+    },
+    {
+      "id": 5,
+      "name": "Mental Health",
+      "snomed_code": "394587001",
+      "description": "Psychiatric and behavioral health services",
+      "common_conditions": [
+        {"code": "F41.1", "display": "Generalized anxiety disorder"},
+        {"code": "F32.9", "display": "Major depressive disorder"},
+        {"code": "F31.9", "display": "Bipolar disorder"},
+        {"code": "F20.9", "display": "Schizophrenia"},
+        {"code": "F43.10", "display": "Post-traumatic stress disorder"},
+        {"code": "F90.0", "display": "Attention-deficit hyperactivity disorder"},
+        {"code": "F33.9", "display": "Recurrent depressive disorder"},
+        {"code": "F40.10", "display": "Social anxiety disorder"},
+        {"code": "F42.9", "display": "Obsessive-compulsive disorder"},
+        {"code": "F50.9", "display": "Eating disorder"}
+      ],
+      "common_procedures": [
+        "Psychiatric evaluation",
+        "Psychotherapy",
+        "Medication management",
+        "Crisis intervention",
+        "Cognitive behavioral therapy"
+      ],
+      "typical_patient_ages": [10, 100],
+      "visit_duration_minutes": {"new": 60, "followup": 30}
+    },
+    {
+      "id": 6,
+      "name": "Neurology",
+      "snomed_code": "394591006",
+      "description": "Diagnosis and treatment of nervous system disorders",
+      "common_conditions": [
+        {"code": "G43.909", "display": "Migraine"},
+        {"code": "G40.909", "display": "Epilepsy"},
+        {"code": "G35", "display": "Multiple sclerosis"},
+        {"code": "G20", "display": "Parkinson's disease"},
+        {"code": "G47.33", "display": "Obstructive sleep apnea"},
+        {"code": "G62.9", "display": "Peripheral neuropathy"},
+        {"code": "G30.9", "display": "Alzheimer's disease"},
+        {"code": "G56.0", "display": "Carpal tunnel syndrome"},
+        {"code": "G44.1", "display": "Tension headache"},
+        {"code": "G50.0", "display": "Trigeminal neuralgia"}
+      ],
+      "common_procedures": [
+        "EEG",
+        "EMG/Nerve conduction study",
+        "Lumbar puncture",
+        "Brain MRI",
+        "Neurological exam"
+      ],
+      "typical_patient_ages": [18, 90],
+      "visit_duration_minutes": {"new": 45, "followup": 25}
+    },
+    {
+      "id": 7,
+      "name": "Gastroenterology",
+      "snomed_code": "394584008",
+      "description": "Treatment of digestive system disorders",
+      "common_conditions": [
+        {"code": "K21.9", "display": "Gastroesophageal reflux disease"},
+        {"code": "K58.9", "display": "Irritable bowel syndrome"},
+        {"code": "K50.90", "display": "Crohn's disease"},
+        {"code": "K51.90", "display": "Ulcerative colitis"},
+        {"code": "K74.6", "display": "Cirrhosis of liver"},
+        {"code": "K76.0", "display": "Fatty liver disease"},
+        {"code": "K80.20", "display": "Cholelithiasis"},
+        {"code": "K29.70", "display": "Gastritis"},
+        {"code": "K25.9", "display": "Peptic ulcer"},
+        {"code": "K62.5", "display": "Hemorrhoids"}
+      ],
+      "common_procedures": [
+        "Colonoscopy",
+        "Upper endoscopy",
+        "Liver biopsy",
+        "ERCP",
+        "Capsule endoscopy"
+      ],
+      "typical_patient_ages": [25, 85],
+      "visit_duration_minutes": {"new": 40, "followup": 20}
+    },
+    {
+      "id": 8,
+      "name": "Pulmonology",
+      "snomed_code": "418112009",
+      "description": "Treatment of respiratory system disorders",
+      "common_conditions": [
+        {"code": "J44.9", "display": "COPD"},
+        {"code": "J45.909", "display": "Asthma"},
+        {"code": "J84.9", "display": "Interstitial lung disease"},
+        {"code": "J18.9", "display": "Pneumonia"},
+        {"code": "J93.9", "display": "Pneumothorax"},
+        {"code": "J81.0", "display": "Pulmonary edema"},
+        {"code": "J47.9", "display": "Bronchiectasis"},
+        {"code": "J98.4", "display": "Pulmonary fibrosis"},
+        {"code": "C34.90", "display": "Lung cancer"},
+        {"code": "I27.0", "display": "Pulmonary hypertension"}
+      ],
+      "common_procedures": [
+        "Pulmonary function test",
+        "Bronchoscopy",
+        "Chest CT",
+        "Sleep study",
+        "Thoracentesis"
+      ],
+      "typical_patient_ages": [30, 90],
+      "visit_duration_minutes": {"new": 40, "followup": 20}
+    },
+    {
+      "id": 9,
+      "name": "Endocrinology",
+      "snomed_code": "394583002",
+      "description": "Treatment of hormonal and metabolic disorders",
+      "common_conditions": [
+        {"code": "E11.9", "display": "Type 2 diabetes mellitus"},
+        {"code": "E10.9", "display": "Type 1 diabetes mellitus"},
+        {"code": "E03.9", "display": "Hypothyroidism"},
+        {"code": "E05.90", "display": "Hyperthyroidism"},
+        {"code": "E66.9", "display": "Obesity"},
+        {"code": "E78.5", "display": "Hyperlipidemia"},
+        {"code": "E28.2", "display": "Polycystic ovary syndrome"},
+        {"code": "E27.40", "display": "Adrenal insufficiency"},
+        {"code": "E83.52", "display": "Vitamin D deficiency"},
+        {"code": "E21.0", "display": "Hyperparathyroidism"}
+      ],
+      "common_procedures": [
+        "A1C testing",
+        "Thyroid ultrasound",
+        "Glucose tolerance test",
+        "Bone density scan",
+        "Continuous glucose monitoring"
+      ],
+      "typical_patient_ages": [18, 90],
+      "visit_duration_minutes": {"new": 45, "followup": 25}
+    },
+    {
+      "id": 10,
+      "name": "Nephrology",
+      "snomed_code": "394589003",
+      "description": "Treatment of kidney disorders",
+      "common_conditions": [
+        {"code": "N18.9", "display": "Chronic kidney disease"},
+        {"code": "N17.9", "display": "Acute kidney injury"},
+        {"code": "N20.0", "display": "Kidney stones"},
+        {"code": "N04.9", "display": "Nephrotic syndrome"},
+        {"code": "I12.9", "display": "Hypertensive kidney disease"},
+        {"code": "E08.22", "display": "Diabetic kidney disease"},
+        {"code": "N03.9", "display": "Glomerulonephritis"},
+        {"code": "N28.0", "display": "Renal artery stenosis"},
+        {"code": "D63.1", "display": "Anemia in chronic kidney disease"},
+        {"code": "E87.5", "display": "Hyperkalemia"}
+      ],
+      "common_procedures": [
+        "Dialysis",
+        "Kidney biopsy",
+        "Renal ultrasound",
+        "AV fistula placement",
+        "Kidney function tests"
+      ],
+      "typical_patient_ages": [35, 90],
+      "visit_duration_minutes": {"new": 40, "followup": 25}
+    },
+    {
+      "id": 11,
+      "name": "Oncology",
+      "snomed_code": "394592004",
+      "description": "Cancer diagnosis and treatment",
+      "common_conditions": [
+        {"code": "C50.919", "display": "Breast cancer"},
+        {"code": "C34.90", "display": "Lung cancer"},
+        {"code": "C18.9", "display": "Colon cancer"},
+        {"code": "C61", "display": "Prostate cancer"},
+        {"code": "C43.9", "display": "Melanoma"},
+        {"code": "C91.10", "display": "Leukemia"},
+        {"code": "C85.90", "display": "Lymphoma"},
+        {"code": "C56.9", "display": "Ovarian cancer"},
+        {"code": "C67.9", "display": "Bladder cancer"},
+        {"code": "C16.9", "display": "Gastric cancer"}
+      ],
+      "common_procedures": [
+        "Chemotherapy",
+        "Radiation therapy",
+        "Tumor biopsy",
+        "PET scan",
+        "Immunotherapy"
+      ],
+      "typical_patient_ages": [40, 90],
+      "visit_duration_minutes": {"new": 60, "followup": 30}
+    },
+    {
+      "id": 12,
+      "name": "Rheumatology",
+      "snomed_code": "394810000",
+      "description": "Treatment of autoimmune and joint disorders",
+      "common_conditions": [
+        {"code": "M05.9", "display": "Rheumatoid arthritis"},
+        {"code": "M32.9", "display": "Systemic lupus erythematosus"},
+        {"code": "M06.9", "display": "Rheumatoid arthritis"},
+        {"code": "M35.2", "display": "Sjogren syndrome"},
+        {"code": "M34.9", "display": "Systemic sclerosis"},
+        {"code": "M10.9", "display": "Gout"},
+        {"code": "M45.9", "display": "Ankylosing spondylitis"},
+        {"code": "M35.3", "display": "Polymyalgia rheumatica"},
+        {"code": "M79.7", "display": "Fibromyalgia"},
+        {"code": "M33.20", "display": "Polymyositis"}
+      ],
+      "common_procedures": [
+        "Joint injection",
+        "Arthrocentesis",
+        "Autoimmune panel",
+        "Joint ultrasound",
+        "Biologic therapy"
+      ],
+      "typical_patient_ages": [25, 85],
+      "visit_duration_minutes": {"new": 45, "followup": 25}
+    },
+    {
+      "id": 13,
+      "name": "Ophthalmology",
+      "snomed_code": "422191005",
+      "description": "Eye and vision care",
+      "common_conditions": [
+        {"code": "H25.9", "display": "Cataracts"},
+        {"code": "H40.9", "display": "Glaucoma"},
+        {"code": "H35.30", "display": "Macular degeneration"},
+        {"code": "H52.1", "display": "Myopia"},
+        {"code": "H52.0", "display": "Hyperopia"},
+        {"code": "E11.319", "display": "Diabetic retinopathy"},
+        {"code": "H10.9", "display": "Conjunctivitis"},
+        {"code": "H16.9", "display": "Keratitis"},
+        {"code": "H33.0", "display": "Retinal detachment"},
+        {"code": "H04.20", "display": "Dry eye syndrome"}
+      ],
+      "common_procedures": [
+        "Cataract surgery",
+        "LASIK",
+        "Eye exam",
+        "Retinal imaging",
+        "Glaucoma surgery"
+      ],
+      "typical_patient_ages": [0, 100],
+      "visit_duration_minutes": {"new": 30, "followup": 15}
+    },
+    {
+      "id": 14,
+      "name": "ENT",
+      "snomed_code": "418960008",
+      "description": "Ear, nose, and throat disorders",
+      "common_conditions": [
+        {"code": "H66.90", "display": "Otitis media"},
+        {"code": "J34.2", "display": "Deviated nasal septum"},
+        {"code": "J32.9", "display": "Chronic sinusitis"},
+        {"code": "H81.0", "display": "Meniere's disease"},
+        {"code": "H91.90", "display": "Hearing loss"},
+        {"code": "J35.1", "display": "Tonsillar hypertrophy"},
+        {"code": "R49.0", "display": "Voice disorders"},
+        {"code": "H60.9", "display": "Otitis externa"},
+        {"code": "J30.9", "display": "Allergic rhinitis"},
+        {"code": "H93.1", "display": "Tinnitus"}
+      ],
+      "common_procedures": [
+        "Tonsillectomy",
+        "Septoplasty",
+        "Hearing test",
+        "Sinus surgery",
+        "Laryngoscopy"
+      ],
+      "typical_patient_ages": [0, 100],
+      "visit_duration_minutes": {"new": 30, "followup": 15}
+    },
+    {
+      "id": 15,
+      "name": "Urology",
+      "snomed_code": "394612005",
+      "description": "Urinary tract and male reproductive system",
+      "common_conditions": [
+        {"code": "N40.0", "display": "Benign prostatic hyperplasia"},
+        {"code": "N39.0", "display": "Urinary tract infection"},
+        {"code": "N20.0", "display": "Kidney stones"},
+        {"code": "C61", "display": "Prostate cancer"},
+        {"code": "N31.9", "display": "Bladder dysfunction"},
+        {"code": "N30.00", "display": "Cystitis"},
+        {"code": "N42.9", "display": "Prostatitis"},
+        {"code": "N52.9", "display": "Erectile dysfunction"},
+        {"code": "N39.3", "display": "Urinary incontinence"},
+        {"code": "C67.9", "display": "Bladder cancer"}
+      ],
+      "common_procedures": [
+        "Cystoscopy",
+        "Prostate biopsy",
+        "TURP",
+        "Lithotripsy",
+        "Vasectomy"
+      ],
+      "typical_patient_ages": [18, 90],
+      "visit_duration_minutes": {"new": 30, "followup": 20}
+    },
+    {
+      "id": 16,
+      "name": "OB/GYN",
+      "snomed_code": "394586005",
+      "description": "Women's health and obstetrics",
+      "common_conditions": [
+        {"code": "O80", "display": "Normal pregnancy"},
+        {"code": "N92.0", "display": "Menorrhagia"},
+        {"code": "N80.9", "display": "Endometriosis"},
+        {"code": "N83.2", "display": "Ovarian cysts"},
+        {"code": "C50.919", "display": "Breast mass"},
+        {"code": "N95.1", "display": "Menopausal symptoms"},
+        {"code": "N73.9", "display": "Pelvic inflammatory disease"},
+        {"code": "N94.6", "display": "Dysmenorrhea"},
+        {"code": "D25.9", "display": "Uterine fibroids"},
+        {"code": "N81.2", "display": "Pelvic organ prolapse"}
+      ],
+      "common_procedures": [
+        "Pap smear",
+        "Prenatal visit",
+        "Mammogram",
+        "Ultrasound",
+        "Colposcopy"
+      ],
+      "typical_patient_ages": [15, 65],
+      "visit_duration_minutes": {"new": 40, "followup": 20}
+    },
+    {
+      "id": 17,
+      "name": "Pediatrics",
+      "snomed_code": "394537008",
+      "description": "Healthcare for children and adolescents",
+      "common_conditions": [
+        {"code": "J06.9", "display": "Upper respiratory infection"},
+        {"code": "J20.9", "display": "Acute bronchitis"},
+        {"code": "H66.90", "display": "Otitis media"},
+        {"code": "A09", "display": "Gastroenteritis"},
+        {"code": "J45.909", "display": "Asthma"},
+        {"code": "L20.9", "display": "Atopic dermatitis"},
+        {"code": "F90.0", "display": "ADHD"},
+        {"code": "E66.9", "display": "Childhood obesity"},
+        {"code": "R50.9", "display": "Fever"},
+        {"code": "J03.90", "display": "Acute tonsillitis"}
+      ],
+      "common_procedures": [
+        "Well-child visit",
+        "Immunizations",
+        "Growth assessment",
+        "Developmental screening",
+        "Sports physical"
+      ],
+      "typical_patient_ages": [0, 18],
+      "visit_duration_minutes": {"new": 30, "followup": 20}
+    },
+    {
+      "id": 18,
+      "name": "Geriatrics",
+      "snomed_code": "394811001",
+      "description": "Healthcare for elderly patients",
+      "common_conditions": [
+        {"code": "G30.9", "display": "Dementia"},
+        {"code": "M81.0", "display": "Osteoporosis"},
+        {"code": "I10", "display": "Hypertension"},
+        {"code": "E11.9", "display": "Type 2 diabetes"},
+        {"code": "I50.9", "display": "Heart failure"},
+        {"code": "F03.90", "display": "Cognitive decline"},
+        {"code": "R26.81", "display": "Falls"},
+        {"code": "N39.3", "display": "Urinary incontinence"},
+        {"code": "M79.3", "display": "Chronic pain"},
+        {"code": "F32.9", "display": "Depression"}
+      ],
+      "common_procedures": [
+        "Comprehensive geriatric assessment",
+        "Fall risk evaluation",
+        "Cognitive screening",
+        "Medication review",
+        "Advance care planning"
+      ],
+      "typical_patient_ages": [65, 100],
+      "visit_duration_minutes": {"new": 50, "followup": 30}
+    },
+    {
+      "id": 19,
+      "name": "Infectious Disease",
+      "snomed_code": "408454008",
+      "description": "Diagnosis and treatment of infections",
+      "common_conditions": [
+        {"code": "B20", "display": "HIV disease"},
+        {"code": "A15.0", "display": "Tuberculosis"},
+        {"code": "B18.2", "display": "Chronic hepatitis C"},
+        {"code": "B18.1", "display": "Chronic hepatitis B"},
+        {"code": "A40.9", "display": "Sepsis"},
+        {"code": "B37.9", "display": "Candidiasis"},
+        {"code": "A69.20", "display": "Lyme disease"},
+        {"code": "B58.9", "display": "Toxoplasmosis"},
+        {"code": "J18.9", "display": "Pneumonia"},
+        {"code": "A41.9", "display": "Bacteremia"}
+      ],
+      "common_procedures": [
+        "HIV testing",
+        "Cultures",
+        "Antibiotic management",
+        "Travel medicine consultation",
+        "Infectious disease consultation"
+      ],
+      "typical_patient_ages": [18, 90],
+      "visit_duration_minutes": {"new": 45, "followup": 25}
+    },
+    {
+      "id": 20,
+      "name": "Hematology",
+      "snomed_code": "394803003",
+      "description": "Blood and bleeding disorders",
+      "common_conditions": [
+        {"code": "D64.9", "display": "Anemia"},
+        {"code": "D50.9", "display": "Iron deficiency anemia"},
+        {"code": "D69.6", "display": "Thrombocytopenia"},
+        {"code": "D68.9", "display": "Coagulation disorder"},
+        {"code": "D66", "display": "Hemophilia A"},
+        {"code": "D57.1", "display": "Sickle cell disease"},
+        {"code": "C91.10", "display": "Chronic lymphocytic leukemia"},
+        {"code": "D75.1", "display": "Polycythemia"},
+        {"code": "D47.4", "display": "Myelodysplastic syndrome"},
+        {"code": "D68.61", "display": "Antiphospholipid syndrome"}
+      ],
+      "common_procedures": [
+        "Complete blood count",
+        "Bone marrow biopsy",
+        "Coagulation studies",
+        "Blood transfusion",
+        "Platelet function tests"
+      ],
+      "typical_patient_ages": [18, 90],
+      "visit_duration_minutes": {"new": 40, "followup": 25}
+    },
+    {
+      "id": 21,
+      "name": "Pain Management",
+      "snomed_code": "394914008",
+      "description": "Chronic pain treatment and management",
+      "common_conditions": [
+        {"code": "M54.5", "display": "Chronic low back pain"},
+        {"code": "M79.7", "display": "Fibromyalgia"},
+        {"code": "G89.29", "display": "Chronic pain syndrome"},
+        {"code": "M25.5", "display": "Joint pain"},
+        {"code": "G50.0", "display": "Trigeminal neuralgia"},
+        {"code": "M54.2", "display": "Cervical pain"},
+        {"code": "G89.4", "display": "Chronic pain with psychological factors"},
+        {"code": "M79.1", "display": "Myalgia"},
+        {"code": "G56.0", "display": "Carpal tunnel syndrome"},
+        {"code": "M47.812", "display": "Degenerative disc disease"}
+      ],
+      "common_procedures": [
+        "Epidural injection",
+        "Nerve block",
+        "Pain management consultation",
+        "Physical therapy",
+        "Medication management"
+      ],
+      "typical_patient_ages": [25, 90],
+      "visit_duration_minutes": {"new": 45, "followup": 25}
+    }
+  ]
+}

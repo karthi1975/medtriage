@@ -1,0 +1,33 @@
+{
+  "common_labs": [
+    {"code": "718-7", "display": "Hemoglobin [Mass/volume] in Blood", "units": "g/dL", "reference_range": {"low": 12.0, "high": 16.0}},
+    {"code": "2093-3", "display": "Cholesterol [Mass/volume] in Serum or Plasma", "units": "mg/dL", "reference_range": {"low": 0, "high": 200}},
+    {"code": "2089-1", "display": "LDL Cholesterol", "units": "mg/dL", "reference_range": {"low": 0, "high": 100}},
+    {"code": "2085-9", "display": "HDL Cholesterol", "units": "mg/dL", "reference_range": {"low": 40, "high": 1000}},
+    {"code": "2571-8", "display": "Triglyceride", "units": "mg/dL", "reference_range": {"low": 0, "high": 150}},
+    {"code": "4548-4", "display": "Hemoglobin A1c", "units": "%", "reference_range": {"low": 4.0, "high": 5.6}},
+    {"code": "2345-7", "display": "Glucose [Mass/volume] in Serum or Plasma", "units": "mg/dL", "reference_range": {"low": 70, "high": 100}},
+    {"code": "3094-0", "display": "Urea nitrogen [Mass/volume] in Serum or Plasma", "units": "mg/dL", "reference_range": {"low": 7, "high": 20}},
+    {"code": "2160-0", "display": "Creatinine [Mass/volume] in Serum or Plasma", "units": "mg/dL", "reference_range": {"low": 0.6, "high": 1.2}},
+    {"code": "6690-2", "display": "Leukocytes [#/volume] in Blood", "units": "10*3/uL", "reference_range": {"low": 4.5, "high": 11.0}},
+    {"code": "777-3", "display": "Platelets [#/volume] in Blood", "units": "10*3/uL", "reference_range": {"low": 150, "high": 400}},
+    {"code": "1742-6", "display": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma", "units": "U/L", "reference_range": {"low": 0, "high": 40}},
+    {"code": "1920-8", "display": "Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma", "units": "U/L", "reference_range": {"low": 0, "high": 40}},
+    {"code": "1975-2", "display": "Bilirubin.total [Mass/volume] in Serum or Plasma", "units": "mg/dL", "reference_range": {"low": 0.1, "high": 1.2}},
+    {"code": "2951-2", "display": "Sodium [Moles/volume] in Serum or Plasma", "units": "mmol/L", "reference_range": {"low": 136, "high": 145}},
+    {"code": "2823-3", "display": "Potassium [Moles/volume] in Serum or Plasma", "units": "mmol/L", "reference_range": {"low": 3.5, "high": 5.1}},
+    {"code": "3016-3", "display": "Thyrotropin [Units/volume] in Serum or Plasma", "units": "mIU/L", "reference_range": {"low": 0.4, "high": 4.0}}
+  ],
+  "specialty_specific": {
+    "Cardiology": [
+      {"code": "2157-6", "display": "Creatine kinase.MB [Mass/volume] in Serum or Plasma", "units": "ng/mL", "reference_range": {"low": 0, "high": 5}},
+      {"code": "10839-9", "display": "Troponin I.cardiac [Mass/volume] in Serum or Plasma", "units": "ng/mL", "reference_range": {"low": 0, "high": 0.04}},
+      {"code": "33762-6", "display": "Natriuretic peptide B [Mass/volume] in Serum or Plasma", "units": "pg/mL", "reference_range": {"low": 0, "high": 100}}
+    ],
+    "Orthopedics": [
+      {"code": "2965-2", "display": "Calcium [Mass/volume] in Serum or Plasma", "units": "mg/dL", "reference_range": {"low": 8.5, "high": 10.5}},
+      {"code": "14849-6", "display": "Vitamin D", "units": "ng/mL", "reference_range": {"low": 30, "high": 100}},
+      {"code": "6301-6", "display": "Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma", "units": "U/L", "reference_range": {"low": 30, "high": 120}}
+    ]
+  }
+}

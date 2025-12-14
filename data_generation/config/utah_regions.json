@@ -1,0 +1,170 @@
+{
+  "regions": [
+    {
+      "name": "Salt Lake Valley",
+      "cities": [
+        {"name": "Salt Lake City", "zip_codes": ["84101", "84102", "84103", "84104", "84105", "84106", "84107", "84108", "84109", "84110", "84111", "84112", "84113", "84114", "84115", "84116", "84117", "84118", "84119", "84120", "84121", "84122", "84123", "84124", "84125", "84126", "84127", "84128", "84129", "84130", "84131", "84132", "84133", "84134", "84135", "84136", "84137", "84138", "84139", "84140", "84141", "84142", "84143", "84144", "84145", "84147", "84148", "84150", "84151", "84152", "84157", "84158", "84165", "84170", "84171", "84180", "84184", "84189", "84190", "84199"]},
+        {"name": "West Valley City", "zip_codes": ["84119", "84120", "84128"]},
+        {"name": "Sandy", "zip_codes": ["84070", "84090", "84091", "84092", "84093", "84094"]},
+        {"name": "West Jordan", "zip_codes": ["84081", "84084", "84088"]},
+        {"name": "South Jordan", "zip_codes": ["84095", "84096"]},
+        {"name": "Murray", "zip_codes": ["84107", "84121", "84123"]},
+        {"name": "Draper", "zip_codes": ["84020"]},
+        {"name": "Riverton", "zip_codes": ["84065"]},
+        {"name": "Herriman", "zip_codes": ["84096"]},
+        {"name": "Midvale", "zip_codes": ["84047"]}
+      ],
+      "population_percentage": 60,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 23,
+          "18-35": 28,
+          "36-50": 22,
+          "51-65": 17,
+          "66+": 10
+        },
+        "gender_distribution": {
+          "male": 50,
+          "female": 50
+        }
+      }
+    },
+    {
+      "name": "Utah County",
+      "cities": [
+        {"name": "Provo", "zip_codes": ["84601", "84602", "84603", "84604", "84605", "84606"]},
+        {"name": "Orem", "zip_codes": ["84057", "84058", "84059", "84097"]},
+        {"name": "Spanish Fork", "zip_codes": ["84660"]},
+        {"name": "Lehi", "zip_codes": ["84003", "84043"]},
+        {"name": "American Fork", "zip_codes": ["84003"]},
+        {"name": "Pleasant Grove", "zip_codes": ["84062"]}
+      ],
+      "population_percentage": 20,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 28,
+          "18-35": 35,
+          "36-50": 20,
+          "51-65": 12,
+          "66+": 5
+        },
+        "gender_distribution": {
+          "male": 51,
+          "female": 49
+        }
+      }
+    },
+    {
+      "name": "Davis/Weber",
+      "cities": [
+        {"name": "Ogden", "zip_codes": ["84201", "84244", "84401", "84402", "84403", "84404", "84405", "84407", "84408", "84409", "84412"]},
+        {"name": "Layton", "zip_codes": ["84040", "84041"]},
+        {"name": "Clearfield", "zip_codes": ["84015", "84016"]},
+        {"name": "Kaysville", "zip_codes": ["84037"]},
+        {"name": "Farmington", "zip_codes": ["84025"]},
+        {"name": "Bountiful", "zip_codes": ["84010", "84011"]}
+      ],
+      "population_percentage": 10,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 26,
+          "18-35": 25,
+          "36-50": 24,
+          "51-65": 16,
+          "66+": 9
+        },
+        "gender_distribution": {
+          "male": 50,
+          "female": 50
+        }
+      }
+    },
+    {
+      "name": "Cache Valley",
+      "cities": [
+        {"name": "Logan", "zip_codes": ["84321", "84322", "84323", "84341"]},
+        {"name": "North Logan", "zip_codes": ["84341"]},
+        {"name": "Smithfield", "zip_codes": ["84335"]}
+      ],
+      "population_percentage": 3,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 24,
+          "18-35": 40,
+          "36-50": 18,
+          "51-65": 12,
+          "66+": 6
+        },
+        "gender_distribution": {
+          "male": 51,
+          "female": 49
+        }
+      }
+    },
+    {
+      "name": "Washington County",
+      "cities": [
+        {"name": "St. George", "zip_codes": ["84770", "84771", "84790"]},
+        {"name": "Washington", "zip_codes": ["84780"]},
+        {"name": "Hurricane", "zip_codes": ["84737"]},
+        {"name": "Cedar City", "zip_codes": ["84720", "84721"]}
+      ],
+      "population_percentage": 5,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 18,
+          "18-35": 20,
+          "36-50": 22,
+          "51-65": 25,
+          "66+": 15
+        },
+        "gender_distribution": {
+          "male": 49,
+          "female": 51
+        }
+      }
+    },
+    {
+      "name": "Central Utah",
+      "cities": [
+        {"name": "Price", "zip_codes": ["84501"]},
+        {"name": "Richfield", "zip_codes": ["84701"]}
+      ],
+      "population_percentage": 1,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 25,
+          "18-35": 22,
+          "36-50": 25,
+          "51-65": 18,
+          "66+": 10
+        },
+        "gender_distribution": {
+          "male": 52,
+          "female": 48
+        }
+      }
+    },
+    {
+      "name": "Uintah Basin",
+      "cities": [
+        {"name": "Vernal", "zip_codes": ["84078", "84079"]},
+        {"name": "Roosevelt", "zip_codes": ["84066"]}
+      ],
+      "population_percentage": 1,
+      "demographics": {
+        "age_distribution": {
+          "0-17": 28,
+          "18-35": 24,
+          "36-50": 26,
+          "51-65": 15,
+          "66+": 7
+        },
+        "gender_distribution": {
+          "male": 53,
+          "female": 47
+        }
+      }
+    }
+  ]
+}

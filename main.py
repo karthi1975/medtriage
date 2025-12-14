@@ -22,6 +22,18 @@ from schemas import (
     TriageRequest,
     TriageResponse
 )
+from scheduling_schemas import (
+    SchedulingRequest,
+    SchedulingResponse,
+    AppointmentBookingRequest,
+    AppointmentBookingResponse,
+    ProviderSearchRequest,
+    ProviderSearchResponse
+)
+from scheduling_service import SchedulingService
+from database.connection import get_db
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
 # Configure logging
 logging.basicConfig(
@@ -413,6 +425,165 @@ async def perform_triage(request: TriageRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to perform triage assessment: {str(e)}"
+        )
+
+
+# ============================================
+# SCHEDULING ENDPOINTS
+# ============================================
+
+@app.post("/api/v1/scheduling/recommend", response_model=SchedulingResponse)
+async def recommend_appointment_slots(
+    request: SchedulingRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Get intelligent appointment slot recommendations based on triage priority and tribal knowledge
+
+    Args:
+        request: Scheduling request with specialty, urgency, and preferences
+
+    Returns:
+        Top 3 recommended appointment slots with reasoning
+    """
+    try:
+        logger.info(f"Recommending slots for specialty {request.specialty_id}, priority: {request.triage_priority}")
+
+        scheduling_service = SchedulingService(db)
+
+        recommendations = scheduling_service.recommend_slots(
+            specialty_id=request.specialty_id,
+            triage_priority=request.triage_priority,
+            patient_region=request.patient_region,
+            preferred_date_range=request.preferred_date_range,
+            limit=3
+        )
+
+        return SchedulingResponse(
+            recommendations=recommendations,
+            total_options_found=len(recommendations),
+            message=f"Found {len(recommendations)} recommended slots" if recommendations else "No available slots found"
+        )
+
+    except Exception as e:
+        logger.error(f"Error recommending slots: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to recommend appointment slots: {str(e)}"
+        )
+
+
+@app.post("/api/v1/scheduling/book", response_model=AppointmentBookingResponse)
+async def book_appointment(
+    request: AppointmentBookingRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Book an appointment slot with race condition handling
+
+    Args:
+        request: Appointment booking details
+
+    Returns:
+        Confirmation with appointment ID and confirmation number
+    """
+    try:
+        logger.info(f"Booking appointment for patient {request.patient_fhir_id} with provider {request.provider_id}")
+
+        scheduling_service = SchedulingService(db)
+
+        result = scheduling_service.book_appointment(
+            provider_id=request.provider_id,
+            facility_id=request.facility_id,
+            specialty_id=request.specialty_id,
+            patient_fhir_id=request.patient_fhir_id,
+            appointment_datetime=request.appointment_datetime,
+            duration_minutes=request.duration_minutes,
+            urgency=request.urgency,
+            triage_session_id=request.triage_session_id,
+            reason_for_visit=request.reason_for_visit
+        )
+
+        if not result['success']:
+            if result.get('code') == 409:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=result['error']
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=result.get('error', 'Booking failed')
+                )
+
+        return AppointmentBookingResponse(**result)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error booking appointment: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to book appointment: {str(e)}"
+        )
+
+
+@app.get("/api/v1/providers/search", response_model=ProviderSearchResponse)
+async def search_providers(
+    specialty_id: int,
+    region: str = None,
+    accepts_new_patients: bool = True,
+    db: Session = Depends(get_db)
+):
+    """
+    Search for providers by specialty and region
+
+    Args:
+        specialty_id: Medical specialty ID
+        region: Utah region filter (optional)
+        accepts_new_patients: Filter by accepting new patients
+
+    Returns:
+        List of matching providers
+    """
+    try:
+        from database.models import Provider, Facility
+
+        query = db.query(Provider).join(Facility).filter(
+            Provider.specialty_id == specialty_id,
+            Provider.active == True
+        )
+
+        if accepts_new_patients:
+            query = query.filter(Provider.accepts_new_patients == True)
+
+        if region:
+            query = query.filter(Facility.region == region)
+
+        providers = query.all()
+
+        provider_list = []
+        for p in providers:
+            provider_list.append({
+                "provider_id": p.provider_id,
+                "npi": p.npi,
+                "name": f"Dr. {p.first_name} {p.last_name}",
+                "credentials": p.credentials,
+                "specialty": p.specialty.name,
+                "years_experience": p.years_experience,
+                "languages": p.languages
+            })
+
+        return ProviderSearchResponse(
+            providers=provider_list,
+            count=len(provider_list)
+        )
+
+    except Exception as e:
+        logger.error(f"Error searching providers: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to search providers: {str(e)}"
         )
 
 

@@ -1,0 +1,47 @@
+{
+  "medications_by_condition": {
+    "Hypertension": [
+      {"code": "314076", "display": "Lisinopril 10 MG Oral Tablet", "dosage": "10mg daily"},
+      {"code": "197361", "display": "Metoprolol 50 MG Oral Tablet", "dosage": "50mg BID"},
+      {"code": "308136", "display": "Amlodipine 5 MG Oral Tablet", "dosage": "5mg daily"},
+      {"code": "979492", "display": "Losartan 50 MG Oral Tablet", "dosage": "50mg daily"}
+    ],
+    "Diabetes": [
+      {"code": "860975", "display": "Metformin 500 MG Oral Tablet", "dosage": "500mg BID"},
+      {"code": "1658634", "display": "Insulin Glargine 100 UNT/ML Injectable Solution", "dosage": "20 units daily"},
+      {"code": "1664314", "display": "Sitagliptin 100 MG Oral Tablet", "dosage": "100mg daily"}
+    ],
+    "Hyperlipidemia": [
+      {"code": "617310", "display": "Atorvastatin 40 MG Oral Tablet", "dosage": "40mg daily"},
+      {"code": "36567", "display": "Simvastatin 20 MG Oral Tablet", "dosage": "20mg daily"}
+    ],
+    "Heart_Failure": [
+      {"code": "197379", "display": "Furosemide 40 MG Oral Tablet", "dosage": "40mg daily"},
+      {"code": "847412", "display": "Carvedilol 12.5 MG Oral Tablet", "dosage": "12.5mg BID"},
+      {"code": "205326", "display": "Digoxin 0.25 MG Oral Tablet", "dosage": "0.25mg daily"}
+    ],
+    "Asthma": [
+      {"code": "745678", "display": "Albuterol 0.09 MG/ACTUAT Metered Dose Inhaler", "dosage": "2 puffs PRN"},
+      {"code": "746763", "display": "Fluticasone Propionate 0.11 MG/ACTUAT Metered Dose Inhaler", "dosage": "2 puffs BID"}
+    ],
+    "Pain": [
+      {"code": "161", "display": "Acetaminophen 325 MG Oral Tablet", "dosage": "650mg Q6H PRN"},
+      {"code": "5640", "display": "Ibuprofen 400 MG Oral Tablet", "dosage": "400mg Q6H PRN"}
+    ],
+    "Anxiety": [
+      {"code": "892653", "display": "Sertraline 50 MG Oral Tablet", "dosage": "50mg daily"},
+      {"code": "855332", "display": "Escitalopram 10 MG Oral Tablet", "dosage": "10mg daily"}
+    ],
+    "Depression": [
+      {"code": "856775", "display": "Fluoxetine 20 MG Oral Capsule", "dosage": "20mg daily"},
+      {"code": "896296", "display": "Duloxetine 30 MG Delayed Release Oral Capsule", "dosage": "30mg daily"}
+    ],
+    "GERD": [
+      {"code": "834060", "display": "Omeprazole 20 MG Delayed Release Oral Capsule", "dosage": "20mg daily"}
+    ],
+    "Arthritis": [
+      {"code": "311025", "display": "Naproxen 500 MG Oral Tablet", "dosage": "500mg BID"},
+      {"code": "904361", "display": "Celecoxib 200 MG Oral Capsule", "dosage": "200mg daily"}
+    ]
+  }
+}

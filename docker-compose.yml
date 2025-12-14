@@ -1,6 +1,69 @@
-version: '3.8'
-
 services:
+  # PostgreSQL for HAPI FHIR Server
+  postgres-fhir:
+    image: postgres:15-alpine
+    container_name: postgres-fhir-db
+    environment:
+      POSTGRES_DB: hapi
+      POSTGRES_USER: hapiuser
+      POSTGRES_PASSWORD: hapipassword
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-fhir-data:/var/lib/postgresql/data
+    networks:
+      - fhir-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hapiuser -d hapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL for Tribal Knowledge Database
+  postgres-tribal:
+    image: postgres:15-alpine
+    container_name: postgres-tribal-db
+    environment:
+      POSTGRES_DB: tribal_knowledge
+      POSTGRES_USER: tribaluser
+      POSTGRES_PASSWORD: tribalpassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-tribal-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - fhir-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tribaluser -d tribal_knowledge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # HAPI FHIR JPA Server
+  hapi-fhir:
+    image: hapiproject/hapi:latest
+    container_name: hapi-fhir-server
+    ports:
+      - "8081:8080"
+    environment:
+      spring.datasource.url: jdbc:postgresql://postgres-fhir:5432/hapi
+      spring.datasource.username: hapiuser
+      spring.datasource.password: hapipassword
+      spring.datasource.driverClassName: org.postgresql.Driver
+      spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+      hapi.fhir.allow_external_references: "true"
+      hapi.fhir.allow_multiple_delete: "true"
+      hapi.fhir.allow_placeholder_references: "true"
+    depends_on:
+      postgres-fhir:
+        condition: service_healthy
+    networks:
+      - fhir-network
+    # Healthcheck removed - curl not available in container
+    # HAPI FHIR is accessible on port 8081 when it responds to metadata endpoint
+
+  # Backend API with Scheduling Service
   fhir-chat-api:
     build:
       context: .
@@ -11,7 +74,18 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-3.5-turbo}
-      - FHIR_SERVER_URL=${FHIR_SERVER_URL:-https://hapi.fhir.org/baseR4}
+      - FHIR_SERVER_URL=http://hapi-fhir:8080/fhir
+      - CHAT_HISTORY_LIMIT=${CHAT_HISTORY_LIMIT:-10}
+      - MAX_TOKENS=${MAX_TOKENS:-1500}
+      - TEMPERATURE=${TEMPERATURE:-0.7}
+      - TOP_P=${TOP_P:-1.0}
+      - FREQUENCY_PENALTY=${FREQUENCY_PENALTY:-0.0}
+      - PRESENCE_PENALTY=${PRESENCE_PENALTY:-0.0}
+      - TRIBAL_DB_HOST=postgres-tribal
+      - TRIBAL_DB_PORT=5432
+      - TRIBAL_DB_NAME=tribal_knowledge
+      - TRIBAL_DB_USER=tribaluser
+      - TRIBAL_DB_PASSWORD=tribalpassword
     env_file:
       - .env
     volumes:
@@ -21,6 +95,13 @@ services:
       - ./fhir_client.py:/app/fhir_client.py
       - ./chat_service.py:/app/chat_service.py
       - ./models.py:/app/models.py
+      - ./database:/app/database
+      - ./scheduling_service.py:/app/scheduling_service.py
+      - ./scheduling_schemas.py:/app/scheduling_schemas.py
+      - ./tribal_knowledge_service.py:/app/tribal_knowledge_service.py
+    depends_on:
+      - hapi-fhir
+      - postgres-tribal
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -31,6 +112,52 @@ services:
     networks:
       - fhir-network
 
+  fhir-chat-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # API URL will be proxied through nginx, so use relative path
+        REACT_APP_API_URL: ""
+    container_name: fhir-chat-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - fhir-chat-api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fhir-network
+
+  # PgAdmin for database management (optional, dev only)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@medichat.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-fhir
+      - postgres-tribal
+    networks:
+      - fhir-network
+    profiles:
+      - dev
+
 networks:
   fhir-network:
     driver: bridge
+
+volumes:
+  postgres-fhir-data:
+    driver: local
+  postgres-tribal-data:
+    driver: local

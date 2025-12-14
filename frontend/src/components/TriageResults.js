@@ -2,10 +2,13 @@
  * Triage Results Component
  * Displays triage assessment results and recommendations
  */
-import React from 'react';
+import React, { useState } from 'react';
+import SchedulingPanel from './SchedulingPanel';
 import '../styles/TriageResults.css';
 
-const TriageResults = ({ triageData }) => {
+const TriageResults = ({ triageData, patientId }) => {
+  const [showScheduling, setShowScheduling] = useState(false);
+
   if (!triageData) {
     return null;
   }
@@ -214,6 +217,31 @@ const TriageResults = ({ triageData }) => {
           )}
         </div>
       )}
+
+      {/* Schedule Appointment Section */}
+      <div className="scheduling-section">
+        {!showScheduling ? (
+          <button
+            className="btn-schedule-appointment"
+            onClick={() => setShowScheduling(true)}
+            disabled={!patientId}
+          >
+            📅 Schedule Appointment
+          </button>
+        ) : (
+          <SchedulingPanel
+            triageData={triageData}
+            patientId={patientId}
+            onClose={() => setShowScheduling(false)}
+          />
+        )}
+
+        {!patientId && (
+          <p className="scheduling-note">
+            Patient ID required to schedule appointments
+          </p>
+        )}
+      </div>
 
       <div className="disclaimer">
         <strong>Disclaimer:</strong> This is an AI-powered assessment tool and should not
