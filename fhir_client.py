@@ -50,11 +50,25 @@ class FHIRClient:
                 return None
 
             # Extract patient demographics
+            birth_date_str = patient.birthDate.isostring if hasattr(patient, 'birthDate') and patient.birthDate else None
+
+            # Calculate age from birthDate
+            age = None
+            if birth_date_str:
+                try:
+                    from datetime import datetime
+                    birth_date = datetime.fromisoformat(birth_date_str.replace('Z', '+00:00'))
+                    today = datetime.now()
+                    age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+                except:
+                    age = None
+
             patient_data = {
                 'id': patient.id,
                 'name': self._format_name(patient.name),
                 'gender': patient.gender if hasattr(patient, 'gender') else None,
-                'birthDate': patient.birthDate.isostring if hasattr(patient, 'birthDate') and patient.birthDate else None,
+                'birthDate': birth_date_str,
+                'age': age,
                 'address': self._format_address(patient.address) if hasattr(patient, 'address') else None,
                 'telecom': self._format_telecom(patient.telecom) if hasattr(patient, 'telecom') else None
             }
@@ -215,13 +229,21 @@ class FHIRClient:
         """
         logger.info(f"Retrieving complete history for patient {patient_id}")
 
+        patient_data = self.get_patient(patient_id)
+        if not patient_data:
+            return {'patient': None}
+
         patient_history = {
-            'patient': self.get_patient(patient_id)
+            'patient': patient_data.copy()  # Make a copy to avoid modifying original
         }
 
-        # Only include non-empty arrays
+        # Try to get data from FHIR resources first, fall back to extensions
         conditions = self.get_patient_conditions(patient_id)
+        if not conditions and patient_data and 'conditions_from_extensions' in patient_data:
+            # Use extension data if no FHIR Condition resources exist
+            conditions = patient_data['conditions_from_extensions']
         if conditions:
+            patient_history['patient']['conditions'] = conditions
             patient_history['conditions'] = conditions
 
         observations = self.get_patient_observations(patient_id)
@@ -229,11 +251,20 @@ class FHIRClient:
             patient_history['observations'] = observations
 
         medications = self.get_patient_medications(patient_id)
+        if not medications and patient_data and 'medications_from_extensions' in patient_data:
+            # Use extension data if no FHIR MedicationRequest resources exist
+            # Convert string array to medication object array for frontend compatibility
+            medications = [{"medication": med, "dosage": "", "frequency": ""} for med in patient_data['medications_from_extensions']]
         if medications:
+            patient_history['patient']['medications'] = medications
             patient_history['medications'] = medications
 
         allergies = self.get_patient_allergies(patient_id)
+        if not allergies and patient_data and 'allergies_from_extensions' in patient_data:
+            # Use extension data if no FHIR AllergyIntolerance resources exist
+            allergies = patient_data['allergies_from_extensions']
         if allergies:
+            patient_history['patient']['allergies'] = allergies
             patient_history['allergies'] = allergies
 
         return patient_history
@@ -242,7 +273,7 @@ class FHIRClient:
 
     def _parse_patient_extensions(self, patient) -> Dict[str, Any]:
         """
-        Parse patient extensions for allergies and conditions
+        Parse patient extensions for allergies, conditions, and medications
 
         Args:
             patient: FHIR Patient resource
@@ -257,22 +288,29 @@ class FHIRClient:
 
         allergies = []
         conditions = []
+        medications = []
 
         for ext in patient.extension:
             if hasattr(ext, 'url') and hasattr(ext, 'valueString'):
-                if 'patient-allergy' in ext.url:
+                if 'allergies' in ext.url.lower():
                     # Parse comma-separated allergies
                     allergy_list = [a.strip() for a in ext.valueString.split(',')]
                     allergies.extend(allergy_list)
-                elif 'patient-condition' in ext.url:
+                elif 'conditions' in ext.url.lower():
                     # Parse comma-separated conditions
                     condition_list = [c.strip() for c in ext.valueString.split(',')]
                     conditions.extend(condition_list)
+                elif 'medications' in ext.url.lower():
+                    # Parse comma-separated medications
+                    medication_list = [m.strip() for m in ext.valueString.split(',')]
+                    medications.extend(medication_list)
 
         if allergies:
             extensions_data['allergies_from_extensions'] = allergies
         if conditions:
             extensions_data['conditions_from_extensions'] = conditions
+        if medications:
+            extensions_data['medications_from_extensions'] = medications
 
         return extensions_data
 
