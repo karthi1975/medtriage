@@ -307,18 +307,23 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
 
         # Patient lookup patterns
         patient_id_patterns = [
-            r'patient[\s-]*(id)?[\s:-]*([a-zA-Z0-9\-]+)',
-            r'find\s+patient\s+([a-zA-Z0-9\-]+)',
-            r'look\s*up\s+patient\s+([a-zA-Z0-9\-]+)',
-            r'search\s+patient\s+([a-zA-Z0-9\-]+)',
-            r'get\s+patient\s+([a-zA-Z0-9\-]+)',
-            r'show\s+patient\s+([a-zA-Z0-9\-]+)',
+            # Direct patient ID format (e.g., cardiac-emergency-001, stroke-emergency-002)
+            (r'^([a-z]+\-[a-z]+\-\d+)$', 1),
+            # Patient ID with words (e.g., "patient cardiac-emergency-001", "find patient X")
+            (r'patient[\s-]*(id)?[\s:-]*([a-zA-Z0-9\-]+)', 2),
+            (r'find\s+(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
+            (r'look\s*up\s+(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
+            (r'search\s+(?:for\s+)?(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
+            (r'get\s+(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
+            (r'show\s+(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
+            # Just the ID alone (last resort - match IDs with hyphens and numbers)
+            (r'\b([a-z]+\-[a-z]+\-\d{3,})\b', 1),
         ]
 
-        for pattern in patient_id_patterns:
+        for pattern, group_idx in patient_id_patterns:
             match = re.search(pattern, message, re.IGNORECASE)
             if match:
-                patient_id = match.group(match.lastindex) if match.lastindex else match.group(1)
+                patient_id = match.group(group_idx)
                 logger.info(f"Rule-based classification: PATIENT_LOOKUP with ID {patient_id}")
                 return {
                     "intent_type": "PATIENT_LOOKUP",
