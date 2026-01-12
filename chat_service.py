@@ -1,30 +1,40 @@
 """
-Chat service with OpenAI integration for symptom extraction and conversational AI
+Chat service with Llama 4 integration for symptom extraction and conversational AI
 """
 import json
 import logging
 from typing import List, Dict, Any, Optional
 from openai import OpenAI
 from schemas import ChatMessage, ExtractedSymptom, SymptomExtractionResponse
+from llama_service import LlamaService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class ChatService:
-    """Service for handling chat and symptom extraction using OpenAI"""
+    """Service for handling chat and symptom extraction using Llama 4 and rule-based fallback"""
 
     def __init__(self, api_key: str, model: str = "gpt-3.5-turbo"):
         """
-        Initialize ChatService with OpenAI credentials
+        Initialize ChatService with Llama 4 and OpenAI (fallback)
 
         Args:
-            api_key: OpenAI API key
+            api_key: OpenAI API key (for fallback only)
             model: OpenAI model to use (default: gpt-3.5-turbo)
         """
         self.client = OpenAI(api_key=api_key)
         self.model = model
-        logger.info(f"ChatService initialized with model: {model}")
+
+        # Initialize Llama 4 service for primary AI classification
+        try:
+            self.llama_service = LlamaService()
+            logger.info("ChatService initialized with Llama 4 as primary AI")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Llama service: {e}, using rule-based only")
+            self.llama_service = None
+
+        logger.info(f"ChatService initialized with OpenAI fallback model: {model}")
 
     def chat(
         self,
@@ -334,19 +344,20 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
                 "extracted_entities": {}
             }
 
-        # Try GPT-based classification as secondary option
-        try:
-            # Build context string
-            context_str = ""
-            if conversation_context:
-                if conversation_context.get('current_patient'):
-                    context_str += f"Current patient: {conversation_context['current_patient'].get('name', 'Unknown')}\n"
-                if conversation_context.get('last_triage'):
-                    context_str += f"Last triage priority: {conversation_context['last_triage'].get('priority')}\n"
-                if conversation_context.get('available_slots'):
-                    context_str += f"Available slots shown: {len(conversation_context['available_slots'])}\n"
+        # Try Llama 4 AI-based classification as secondary option
+        if self.llama_service:
+            try:
+                # Build context string
+                context_str = ""
+                if conversation_context:
+                    if conversation_context.get('current_patient'):
+                        context_str += f"Current patient: {conversation_context['current_patient'].get('name', 'Unknown')}\n"
+                    if conversation_context.get('last_triage'):
+                        context_str += f"Last triage priority: {conversation_context['last_triage'].get('priority')}\n"
+                    if conversation_context.get('available_slots'):
+                        context_str += f"Available slots shown: {len(conversation_context['available_slots'])}\n"
 
-            intent_prompt = f"""You are an intent classifier for a Medical Assistant (MA) chat interface.
+                intent_prompt = f"""You are an intent classifier for a Medical Assistant (MA) chat interface.
 
 Classify the intent of the MA's message into ONE of these categories:
 
@@ -391,53 +402,53 @@ Return JSON in this exact format:
 
 Only include entities that are explicitly mentioned in the message."""
 
-            messages = [
-                {"role": "system", "content": intent_prompt},
-                {"role": "user", "content": message}
-            ]
+                messages = [
+                    {"role": "system", "content": intent_prompt},
+                    {"role": "user", "content": message}
+                ]
 
-            logger.info("Classifying intent with GPT")
-            response = self.client.chat.completions.create(
-                model="gpt-4" if "gpt-4" in self.model else self.model,  # Use GPT-4 if available
-                messages=messages,
-                temperature=0.1,  # Very low for consistent classification
-                max_tokens=300
-            )
+                logger.info("Classifying intent with Llama 4")
+                response = self.llama_service.chat_completion(
+                    messages=messages,
+                    temperature=0.1,  # Very low for consistent classification
+                    max_tokens=300
+                )
 
-            raw_response = response.choices[0].message.content
-            logger.debug(f"Intent classification raw response: {raw_response}")
+                if response and response.get('choices'):
+                    raw_response = response['choices'][0]['message']['content']
+                    logger.debug(f"Llama 4 intent classification raw response: {raw_response}")
 
-            # Parse JSON response
-            json_start = raw_response.find('{')
-            json_end = raw_response.rfind('}') + 1
+                    # Parse JSON response
+                    json_start = raw_response.find('{')
+                    json_end = raw_response.rfind('}') + 1
 
-            if json_start != -1 and json_end > json_start:
-                json_str = raw_response[json_start:json_end]
-                result = json.loads(json_str)
+                    if json_start != -1 and json_end > json_start:
+                        json_str = raw_response[json_start:json_end]
+                        result = json.loads(json_str)
 
-                # Validate intent type
-                valid_intents = ["PATIENT_LOOKUP", "TRIAGE_START", "TESTING_CHECK", "SCHEDULE_REQUEST", "APPOINTMENT_CONFIRM", "GENERAL_QUESTION"]
-                if result.get('intent_type') not in valid_intents:
-                    logger.warning(f"Invalid intent type: {result.get('intent_type')}, defaulting to GENERAL_QUESTION")
-                    result['intent_type'] = "GENERAL_QUESTION"
+                        # Validate intent type
+                        valid_intents = ["PATIENT_LOOKUP", "TRIAGE_START", "TESTING_CHECK", "SCHEDULE_REQUEST", "APPOINTMENT_CONFIRM", "GENERAL_QUESTION"]
+                        if result.get('intent_type') not in valid_intents:
+                            logger.warning(f"Invalid intent type: {result.get('intent_type')}, defaulting to GENERAL_QUESTION")
+                            result['intent_type'] = "GENERAL_QUESTION"
 
-                logger.info(f"Intent classified as: {result.get('intent_type')} (confidence: {result.get('confidence')})")
-                return result
-            else:
-                logger.warning("Could not parse intent JSON, defaulting to GENERAL_QUESTION")
-                return {
-                    "intent_type": "GENERAL_QUESTION",
-                    "confidence": 0.5,
-                    "extracted_entities": {}
-                }
+                        logger.info(f"Llama 4: Intent classified as {result.get('intent_type')} (confidence: {result.get('confidence')})")
+                        return result
+                else:
+                    logger.warning("Llama 4 returned no response, using rule-based classification")
 
-        except Exception as e:
-            logger.error(f"Error classifying intent: {str(e)}")
-            return {
-                "intent_type": "GENERAL_QUESTION",
-                "confidence": 0.3,
-                "extracted_entities": {}
-            }
+            except json.JSONDecodeError as e:
+                logger.warning(f"Could not parse Llama 4 JSON response: {e}, using rule-based classification")
+            except Exception as e:
+                logger.error(f"Error with Llama 4 classification: {str(e)}, using rule-based classification")
+
+        # Final fallback: GENERAL_QUESTION
+        logger.info("No pattern matched, defaulting to GENERAL_QUESTION")
+        return {
+            "intent_type": "GENERAL_QUESTION",
+            "confidence": 0.3,
+            "extracted_entities": {}
+        }
 
     def generate_conversational_response(
         self,
