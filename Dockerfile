@@ -31,6 +31,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Copy and make entrypoint script executable
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
@@ -38,12 +42,12 @@ RUN useradd -m -u 1000 appuser && \
 # Switch to non-root user
 USER appuser
 
-# Expose port (Cloud Run uses PORT env var)
+# Expose port (Cloud Run uses PORT env var, default 8080)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; import os; requests.get(f'http://localhost:{os.getenv(\"PORT\", \"8080\")}/health')"
+# Health check (disable for Cloud Run as it has its own health checks)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+#     CMD python -c "import requests; import os; requests.get(f'http://localhost:{os.getenv(\"PORT\", \"8080\")}/health')"
 
-# Run the application (use PORT env var from Cloud Run)
-CMD sh -c "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}"
+# Run the application using entrypoint script
+CMD ["/app/entrypoint.sh"]
