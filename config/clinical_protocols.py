@@ -305,6 +305,220 @@ CLINICAL_PROTOCOLS = {
         ]
     },
 
+    "stroke": {
+        "name": "Stroke Alert Protocol",
+        "priority": ProtocolPriority.CRITICAL,
+        "triggers": {
+            "symptoms": [
+                "facial droop",
+                "face droop",
+                "droopy face",
+                "slurred speech",
+                "can't talk",
+                "can't speak",
+                "difficulty speaking",
+                "arm weakness",
+                "leg weakness",
+                "sudden weakness",
+                "sudden numbness",
+                "sudden confusion",
+                "sudden vision",
+                "sudden severe headache",
+                "worst headache"
+            ],
+            "red_flags": [
+                "sudden onset",
+                "one side",
+                "confusion",
+                "vision loss",
+                "difficulty walking",
+                "loss of balance",
+                "severe headache"
+            ]
+        },
+        "risk_stratification": {
+            "age_threshold": 50,
+            "high_risk_conditions": [
+                "Hypertension",
+                "Atrial fibrillation",
+                "Diabetes",
+                "Hyperlipidemia",
+                "Prior TIA",
+                "Prior stroke"
+            ]
+        },
+        "actions": [
+            {
+                "action": "Activate stroke alert",
+                "urgency": Urgency.IMMEDIATE,
+                "status": "pending",
+                "details": "Call 911 / Activate stroke team"
+            },
+            {
+                "action": "Note time of symptom onset",
+                "urgency": Urgency.IMMEDIATE,
+                "status": "pending",
+                "details": "Critical for tPA eligibility (3-4.5 hour window)"
+            },
+            {
+                "action": "Check blood glucose",
+                "urgency": Urgency.IMMEDIATE,
+                "status": "pending",
+                "details": "Rule out hypoglycemia mimicking stroke"
+            },
+            {
+                "action": "Take vital signs",
+                "urgency": Urgency.IMMEDIATE,
+                "status": "pending",
+                "details": "BP, HR, SpO2 - do NOT give antihypertensives"
+            }
+        ],
+        "pre_appointment_tests": []
+    },
+
+    "fall_trauma": {
+        "name": "Fall/Trauma Protocol",
+        "priority": ProtocolPriority.URGENT,
+        "triggers": {
+            "symptoms": [
+                "fell",
+                "fall",
+                "fallen",
+                "can't get up",
+                "can't stand",
+                "hip pain after fall",
+                "hip hurts",
+                "injured",
+                "trauma"
+            ],
+            "red_flags": [
+                "can't bear weight",
+                "severe pain",
+                "deformity",
+                "head injury",
+                "loss of consciousness",
+                "on blood thinners"
+            ]
+        },
+        "risk_stratification": {
+            "age_threshold": 65,
+            "high_risk_conditions": [
+                "Osteoporosis",
+                "On anticoagulation",
+                "On blood thinners",
+                "Previous fracture"
+            ]
+        },
+        "actions": [
+            {
+                "action": "Call 911 if can't bear weight",
+                "urgency": Urgency.IMMEDIATE,
+                "status": "pending",
+                "details": "Possible hip fracture - do NOT attempt to move patient"
+            },
+            {
+                "action": "Assess for head injury",
+                "urgency": Urgency.IMMEDIATE,
+                "status": "pending",
+                "details": "Loss of consciousness, confusion, headache"
+            },
+            {
+                "action": "Check for other injuries",
+                "urgency": Urgency.URGENT,
+                "status": "pending",
+                "details": "Wrist, shoulder, spine tenderness"
+            }
+        ],
+        "pre_appointment_tests": [
+            {
+                "test": "X-ray hip/pelvis",
+                "max_age_days": 1,
+                "urgency": "before_appointment",
+                "can_schedule_without": False,
+                "reason": "Rule out fracture"
+            }
+        ]
+    },
+
+    "wound_infection": {
+        "name": "Wound/Infection Protocol",
+        "priority": ProtocolPriority.URGENT,
+        "triggers": {
+            "symptoms": [
+                "wound",
+                "ulcer",
+                "sore",
+                "won't heal",
+                "not healing",
+                "smells",
+                "drainage",
+                "pus",
+                "infected",
+                "red streaks"
+            ],
+            "red_flags": [
+                "fever",
+                "spreading redness",
+                "red streaks",
+                "foul odor",
+                "black tissue",
+                "numbness",
+                "diabetic foot"
+            ]
+        },
+        "risk_stratification": {
+            "age_threshold": 60,
+            "high_risk_conditions": [
+                "Diabetes",
+                "Peripheral vascular disease",
+                "Immunosuppressed",
+                "Chronic kidney disease"
+            ]
+        },
+        "actions": [
+            {
+                "action": "Assess wound",
+                "urgency": Urgency.URGENT,
+                "status": "pending",
+                "details": "Size, depth, drainage, odor, surrounding tissue"
+            },
+            {
+                "action": "Check vital signs",
+                "urgency": Urgency.URGENT,
+                "status": "pending",
+                "details": "Fever, tachycardia indicate systemic infection"
+            },
+            {
+                "action": "Wound culture",
+                "urgency": Urgency.URGENT,
+                "status": "pending",
+                "details": "Before starting antibiotics if possible"
+            },
+            {
+                "action": "Check vascular status",
+                "urgency": Urgency.ROUTINE,
+                "status": "pending",
+                "details": "Pedal pulses, capillary refill, sensation"
+            }
+        ],
+        "pre_appointment_tests": [
+            {
+                "test": "HbA1c",
+                "max_age_days": 90,
+                "urgency": "routine",
+                "can_schedule_without": True,
+                "reason": "Assess diabetes control (wound healing)"
+            },
+            {
+                "test": "CBC with differential",
+                "max_age_days": 7,
+                "urgency": "before_appointment",
+                "can_schedule_without": False,
+                "reason": "Assess for systemic infection"
+            }
+        ]
+    },
+
     "hypertension_followup": {
         "name": "Hypertension Follow-up Protocol",
         "priority": ProtocolPriority.ROUTINE,
@@ -415,6 +629,8 @@ def get_protocol_for_symptoms(symptoms: List[str], conditions: List[str] = None)
     """
     Get the appropriate clinical protocol based on symptoms and conditions.
 
+    Prioritizes acute symptom protocols over routine follow-up protocols.
+
     Args:
         symptoms: List of symptom descriptions
         conditions: List of existing conditions
@@ -428,8 +644,12 @@ def get_protocol_for_symptoms(symptoms: List[str], conditions: List[str] = None)
     symptoms_lower = [s.lower() for s in symptoms]
     conditions_lower = [c.lower() for c in conditions]
 
-    # Check each protocol for trigger matches
+    # PHASE 1: Check symptom-based protocols first (higher priority for acute symptoms)
     for protocol_key, protocol in CLINICAL_PROTOCOLS.items():
+        # Skip follow-up protocols in first pass
+        if "followup" in protocol_key or "follow_up" in protocol_key:
+            continue
+
         triggers = protocol.get("triggers", {})
 
         # Check symptom triggers
@@ -439,6 +659,10 @@ def get_protocol_for_symptoms(symptoms: List[str], conditions: List[str] = None)
                 "protocol_key": protocol_key,
                 **protocol
             }
+
+    # PHASE 2: Check condition-based protocols (lower priority, for follow-ups)
+    for protocol_key, protocol in CLINICAL_PROTOCOLS.items():
+        triggers = protocol.get("triggers", {})
 
         # Check condition triggers
         condition_triggers = [t.lower() for t in triggers.get("conditions", [])]
