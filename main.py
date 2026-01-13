@@ -179,7 +179,7 @@ async def create_ma_session(request: MASessionRequest, db: Session = Depends(get
         # Store session (in-memory for now)
         ma_sessions[session_id] = session_data
 
-        logger.info(f"Created MA session {session_id} for {request.ma_name} at {facility.name} ({specialty.name})")
+        logger.info(f"Created MA session {session_id} for {request.ma_name} at {facility_name} ({specialty_name})")
 
         return MASessionResponse(**session_data)
 
