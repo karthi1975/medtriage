@@ -139,29 +139,29 @@ async def create_ma_session(request: MASessionRequest, db: Session = Depends(get
         MASessionResponse with session_id and facility/specialty details
     """
     try:
-        from database.models import Facility, Specialty
+        # Try to use database, but fallback to mock if unavailable
+        facility_id = 1
+        facility_name = request.facility
+        specialty_id = 1
+        specialty_name = request.specialty
 
-        # Validate facility by name
-        facility = db.query(Facility).filter(Facility.name == request.facility).first()
-        if not facility:
-            # Create a mock facility if not found (for demo purposes)
-            logger.warning(f"Facility '{request.facility}' not found, creating mock session")
-            facility_id = 1
-            facility_name = request.facility
-        else:
-            facility_id = facility.facility_id
-            facility_name = facility.name
+        try:
+            from database.models import Facility, Specialty
 
-        # Validate specialty by name
-        specialty = db.query(Specialty).filter(Specialty.name == request.specialty).first()
-        if not specialty:
-            # Create a mock specialty if not found (for demo purposes)
-            logger.warning(f"Specialty '{request.specialty}' not found, creating mock session")
-            specialty_id = 1
-            specialty_name = request.specialty
-        else:
-            specialty_id = specialty.specialty_id
-            specialty_name = specialty.name
+            # Validate facility by name
+            facility = db.query(Facility).filter(Facility.name == request.facility).first()
+            if facility:
+                facility_id = facility.facility_id
+                facility_name = facility.name
+
+            # Validate specialty by name
+            specialty = db.query(Specialty).filter(Specialty.name == request.specialty).first()
+            if specialty:
+                specialty_id = specialty.specialty_id
+                specialty_name = specialty.name
+        except Exception as db_error:
+            # Database unavailable - use mock data
+            logger.warning(f"Database unavailable, using mock session data: {db_error}")
 
         # Create session
         session_id = str(uuid.uuid4())
