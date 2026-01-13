@@ -138,13 +138,22 @@ CLINICAL_PROTOCOLS = {
                 "shortness of breath",
                 "dyspnea",
                 "difficulty breathing",
-                "can't catch breath"
+                "can't catch breath",
+                "can't catch my breath",
+                "catch my breath",
+                "catching my breath",
+                "breath",
+                "breathing"
             ],
             "red_flags": [
                 "at rest",
                 "worsening",
                 "orthopnea",
-                "paroxysmal nocturnal dyspnea"
+                "paroxysmal nocturnal dyspnea",
+                "swelling",
+                "swollen",
+                "edema",
+                "ankles swollen"
             ]
         },
         "risk_stratification": {
@@ -378,7 +387,7 @@ CLINICAL_PROTOCOLS = {
 
     "fall_trauma": {
         "name": "Fall/Trauma Protocol",
-        "priority": ProtocolPriority.URGENT,
+        "priority": ProtocolPriority.CRITICAL,
         "triggers": {
             "symptoms": [
                 "fell",
@@ -388,12 +397,18 @@ CLINICAL_PROTOCOLS = {
                 "can't stand",
                 "hip pain after fall",
                 "hip hurts",
+                "hip pain",
                 "injured",
                 "trauma"
             ],
             "red_flags": [
                 "can't bear weight",
+                "can't get up",
+                "can't stand",
+                "unable to walk",
                 "severe pain",
+                "terribly",
+                "terrible pain",
                 "deformity",
                 "head injury",
                 "loss of consciousness",
