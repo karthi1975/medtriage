@@ -611,7 +611,34 @@ Keep response to 2-3 sentences unless more detail is critical."""
                 except Exception as e:
                     logger.warning(f"Llama response generation failed: {e}, using direct summary")
 
-            # Fallback: For triage, use ma_summary directly to avoid OpenAI dependency
+            # Fallback for PATIENT_LOOKUP: Show patient summary
+            if intent_type == "PATIENT_LOOKUP" and action_results.get('patient'):
+                logger.info("Using structured patient summary for PATIENT_LOOKUP")
+                patient_history = action_results['patient']
+                patient = patient_history.get('patient', {})
+
+                response_parts = []
+                response_parts.append(f"✅ Found patient: {patient.get('name', 'Unknown')}")
+                response_parts.append(f"Age: {patient.get('age', 'Unknown')} | Gender: {patient.get('gender', 'Unknown')}")
+
+                # Add conditions
+                conditions = patient_history.get('conditions', [])
+                if conditions:
+                    condition_names = [c.get('code', 'Unknown') for c in conditions[:5]]
+                    response_parts.append(f"\n📋 Conditions: {', '.join(condition_names)}")
+
+                # Add medications
+                medications = patient_history.get('medications', [])
+                if medications:
+                    med_names = [m.get('medication', 'Unknown') for m in medications[:3]]
+                    response_parts.append(f"💊 Medications: {', '.join(med_names)}")
+                    if len(medications) > 3:
+                        response_parts.append(f"   ... and {len(medications) - 3} more")
+
+                response_parts.append("\n➡️ How can I help with this patient?")
+                return "\n".join(response_parts)
+
+            # Fallback for TRIAGE: Use ma_summary directly
             if action_results.get('triage') and action_results['triage'].get('reasoning'):
                 logger.info("Using triage ma_summary as conversational response")
                 triage = action_results['triage']
