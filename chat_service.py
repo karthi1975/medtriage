@@ -305,11 +305,26 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
         # Rule-based fallback for common patterns (used when OpenAI unavailable)
         message_lower = message.lower()
 
-        # Patient lookup patterns
+        # Check if there's a current patient in context
+        current_patient = conversation_context.get('current_patient') if conversation_context else None
+
+        # PRIORITY 1: If current patient exists and message has symptoms, it's TRIAGE
+        symptom_keywords = ['pain', 'hurt', 'ache', 'fever', 'cough', 'nausea', 'dizzy', 'bleeding', 'swelling', 'chest', 'headache', 'shortness of breath', 'sob', 'vomiting', 'diarrhea', 'rash', 'weakness', 'numbness', 'confusion']
+        has_symptoms = any(keyword in message_lower for keyword in symptom_keywords)
+
+        if current_patient and has_symptoms:
+            logger.info(f"Rule-based classification: TRIAGE_START (current patient exists + symptoms detected)")
+            return {
+                "intent_type": "TRIAGE_START",
+                "confidence": 0.90,
+                "extracted_entities": {"symptoms_detected": True}
+            }
+
+        # PRIORITY 2: Patient lookup patterns (only if no current patient or no symptoms)
         patient_id_patterns = [
             # Numeric patient IDs (e.g., 1000, 1001, 1002, 1003, 1004)
             (r'^\s*(\d{4})\s*$', 1),  # Just the number alone
-            (r'patient[\s-]*(id)?[\s:-]*(\d{4})', 2),  # "patient 1000" or "patient id 1000"
+            (r'patient[\s-]*(id)?[\s:-]*(\d{4})\s*$', 2),  # "patient 1000" or "patient id 1000" (must end after ID)
             (r'find\s+(?:patient\s+)?(\d{4})', 1),  # "find patient 1000" or "find 1000"
             (r'look\s*up\s+(?:patient\s+)?(\d{4})', 1),  # "lookup patient 1000"
             (r'search\s+(?:for\s+)?(?:patient\s+)?(\d{4})', 1),  # "search patient 1000"
@@ -317,8 +332,7 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
             (r'show\s+(?:patient\s+)?(\d{4})', 1),  # "show patient 1000"
             # Direct patient ID format (e.g., cardiac-emergency-001, stroke-emergency-002)
             (r'^([a-z]+\-[a-z]+\-\d+)$', 1),
-            # Patient ID with words (e.g., "patient cardiac-emergency-001", "find patient X")
-            (r'patient[\s-]*(id)?[\s:-]*([a-zA-Z0-9\-]+)', 2),
+            # Patient ID with find/lookup/search verbs
             (r'find\s+(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
             (r'look\s*up\s+(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
             (r'search\s+(?:for\s+)?(?:patient\s+)?([a-zA-Z0-9\-]+)', 1),
@@ -328,20 +342,22 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
             (r'\b([a-z]+\-[a-z]+\-\d{3,})\b', 1),
         ]
 
-        for pattern, group_idx in patient_id_patterns:
-            match = re.search(pattern, message, re.IGNORECASE)
-            if match:
-                patient_id = match.group(group_idx)
-                logger.info(f"Rule-based classification: PATIENT_LOOKUP with ID {patient_id}")
-                return {
-                    "intent_type": "PATIENT_LOOKUP",
-                    "confidence": 0.85,
-                    "extracted_entities": {"patient_id": patient_id}
-                }
+        # Only check patient lookup if no symptoms detected
+        if not has_symptoms:
+            for pattern, group_idx in patient_id_patterns:
+                match = re.search(pattern, message, re.IGNORECASE)
+                if match:
+                    patient_id = match.group(group_idx)
+                    logger.info(f"Rule-based classification: PATIENT_LOOKUP with ID {patient_id}")
+                    return {
+                        "intent_type": "PATIENT_LOOKUP",
+                        "confidence": 0.85,
+                        "extracted_entities": {"patient_id": patient_id}
+                    }
 
-        # Triage patterns (symptoms)
-        symptom_keywords = ['pain', 'hurt', 'ache', 'fever', 'cough', 'nausea', 'dizzy', 'bleeding', 'swelling', 'chest', 'headache']
-        if any(keyword in message_lower for keyword in symptom_keywords):
+        # PRIORITY 3: Triage patterns (if symptoms but no current patient)
+        if has_symptoms:
+            logger.info(f"Rule-based classification: TRIAGE_START (symptoms detected)")
             return {
                 "intent_type": "TRIAGE_START",
                 "confidence": 0.75,
