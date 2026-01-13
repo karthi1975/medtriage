@@ -425,13 +425,16 @@ async def ma_chat(request: MAChatRequest, db: Session = Depends(get_db)):
                     # Extract basic symptoms from the message
                     symptoms_text = request.message
 
+                    # Extract patient data from patient_history
+                    patient_data = current_patient.get('patient', {}) if isinstance(current_patient, dict) else {}
+
                     # Perform intelligent triage
                     triage_result = await intelligent_triage_service.perform_intelligent_triage(
                         patient_fhir_id=request.current_patient_id,
-                        patient_name=current_patient.get('name', 'Unknown'),
-                        patient_age=current_patient.get('age'),
-                        patient_gender=current_patient.get('gender'),
-                        patient_conditions=current_patient.get('conditions', []),
+                        patient_name=patient_data.get('name', 'Unknown'),
+                        patient_age=patient_data.get('age'),
+                        patient_gender=patient_data.get('gender'),
+                        patient_conditions=current_patient.get('conditions', []) if isinstance(current_patient, dict) else [],
                         symptoms=[symptoms_text],
                         symptom_details={"raw_message": symptoms_text},
                         provider_name=session.get('ma_name', 'Medical Assistant'),
