@@ -307,6 +307,14 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
 
         # Patient lookup patterns
         patient_id_patterns = [
+            # Numeric patient IDs (e.g., 1000, 1001, 1002, 1003, 1004)
+            (r'^\s*(\d{4})\s*$', 1),  # Just the number alone
+            (r'patient[\s-]*(id)?[\s:-]*(\d{4})', 2),  # "patient 1000" or "patient id 1000"
+            (r'find\s+(?:patient\s+)?(\d{4})', 1),  # "find patient 1000" or "find 1000"
+            (r'look\s*up\s+(?:patient\s+)?(\d{4})', 1),  # "lookup patient 1000"
+            (r'search\s+(?:for\s+)?(?:patient\s+)?(\d{4})', 1),  # "search patient 1000"
+            (r'get\s+(?:patient\s+)?(\d{4})', 1),  # "get patient 1000"
+            (r'show\s+(?:patient\s+)?(\d{4})', 1),  # "show patient 1000"
             # Direct patient ID format (e.g., cardiac-emergency-001, stroke-emergency-002)
             (r'^([a-z]+\-[a-z]+\-\d+)$', 1),
             # Patient ID with words (e.g., "patient cardiac-emergency-001", "find patient X")
