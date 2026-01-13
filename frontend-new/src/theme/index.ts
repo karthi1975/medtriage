@@ -54,9 +54,15 @@ const theme = createTheme({
     },
     success: {
       main: colors.success,
+      light: '#81C784',
+      dark: '#2E7D32',
+      lighter: '#E8F5E9',  // Very light green for backgrounds
     },
     info: {
       main: colors.info,
+      light: '#64B5F6',
+      dark: '#1976D2',
+      lighter: '#E3F2FD',  // Very light blue for backgrounds
     },
     background: {
       default: colors.background,

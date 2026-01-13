@@ -46,6 +46,7 @@ class Facility(Base):
     website = Column(String(255))
     hours_of_operation = Column(JSONB)
     services_offered = Column(ARRAY(Text))
+    fhir_location_id = Column(String(100))  # FHIR Location resource ID
     active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP, default=datetime.now, onupdate=datetime.now)
@@ -72,9 +73,15 @@ class Provider(Base):
     languages = Column(ARRAY(Text), default=['English'])
     accepts_new_patients = Column(Boolean, default=True)
     telemedicine_available = Column(Boolean, default=False)
+    fhir_practitioner_id = Column(String(100))  # FHIR Practitioner resource ID
     active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now)
     updated_at = Column(TIMESTAMP, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def contact_info(self):
+        """Helper property for FHIR sync"""
+        return self.phone or self.email
 
     # Relationships
     specialty = relationship("Specialty", back_populates="providers")

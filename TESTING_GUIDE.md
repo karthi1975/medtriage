@@ -1,258 +1,357 @@
-# Medical Triage System - Testing Guide
+# Testing Guide - MediChat GCP Deployment
 
-## ✅ System Architecture Verification
+## 🧪 Available Test Files
 
-### Backend (FastAPI)
-- **Port**: 8002
-- **Host**: 0.0.0.0
-- **CORS**: Enabled for all origins
-- **OpenAI**: Configured with API key
-- **FHIR Server**: https://hapi.fhir.org/baseR4
+### **Quick Tests** (Start Here)
 
-### Frontend (React)
-- **Port**: 3000 (default React)
-- **Backend Proxy**: http://localhost:8002
-- **API Base URL**: http://localhost:8002
+#### 1. `test-complete-deployment.sh` ⭐ **RECOMMENDED**
+**What it tests**: Complete deployment (Frontend + Backend + HAPI FHIR)
 
-### All Endpoints Wired:
-
-#### Backend API Endpoints:
-1. ✅ `GET /` - Root health check
-2. ✅ `GET /health` - Health check endpoint
-3. ✅ `GET /api/v1/patients/{patient_id}` - Get patient history
-4. ✅ `POST /api/v1/chat` - Chat with AI assistant
-5. ✅ `POST /api/v1/extract-symptoms` - Extract symptoms from text
-6. ✅ `GET /api/v1/patients/{patient_id}/demographics` - Patient demographics
-7. ✅ `GET /api/v1/patients/{patient_id}/conditions` - Patient conditions
-8. ✅ `GET /api/v1/patients/{patient_id}/medications` - Patient medications
-9. ✅ `GET /api/v1/patients/{patient_id}/allergies` - Patient allergies
-10. ✅ `POST /api/v1/triage` - Perform triage assessment
-
-#### Frontend API Calls:
-1. ✅ `healthCheck()` → `GET /health`
-2. ✅ `performTriage()` → `POST /api/v1/triage`
-3. ✅ `sendChatMessage()` → `POST /api/v1/chat`
-4. ✅ `extractSymptoms()` → `POST /api/v1/extract-symptoms`
-5. ✅ `getPatientHistory()` → `GET /api/v1/patients/{id}`
-
-### Service Integrations:
-- ✅ **ChatService** - Integrated with OpenAI GPT-3.5-turbo
-- ✅ **TriageService** - Rule-based + AI triage logic
-- ✅ **FHIRClient** - Connected to HAPI FHIR server
-- ✅ **CORS** - Frontend can communicate with backend
-
----
-
-## 🚀 How to Start and Test
-
-### Terminal 1: Start Backend API
-
+**Run it**:
 ```bash
-cd /Users/karthi/GA_ML_COURSE/CS-6440-O01/project
-source venv/bin/activate
-python main.py
+./test-complete-deployment.sh
 ```
 
-**Expected Output:**
-```
-INFO:     Started server process [xxxx]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
-```
+**Tests**:
+- ✅ Frontend health and accessibility
+- ✅ Backend API health
+- ✅ Llama 4 AI integration
+- ✅ HAPI FHIR metadata endpoint
+- ✅ HAPI FHIR patient search
+- ✅ End-to-end integration
+- ✅ Cloud SQL database connection
 
-### Terminal 2: Start Frontend
+**Time**: ~30 seconds
 
+---
+
+#### 2. `quick-cloudrun-test.sh`
+**What it tests**: Cloud Run services only
+
+**Run it**:
 ```bash
-cd /Users/karthi/GA_ML_COURSE/CS-6440-O01/project/frontend
-npm start
+./quick-cloudrun-test.sh
 ```
 
-**Expected Output:**
-```
-Compiled successfully!
+**Tests**:
+- Frontend and Backend Cloud Run services
+- Llama API
+- Basic chat endpoint
 
-You can now view fhir-triage-frontend in the browser.
-
-  Local:            http://localhost:3000
-  On Your Network:  http://192.168.x.x:3000
-```
+**Time**: ~15 seconds
 
 ---
 
-## 🧪 Testing URLs
+### **Comprehensive Tests**
 
-### 1. Frontend Application
-**URL**: http://localhost:3000
+#### 3. `test-cloudrun-deployment.sh`
+**What it tests**: All Cloud Run endpoints with 12 test patients
 
-**What to Test:**
-- ✅ Page loads with "Medical Triage System" header
-- ✅ API Status shows "Connected to API" (green dot)
-- ✅ Chat interface is visible on the left
-- ✅ Empty results panel on the right shows "No Assessment Yet"
-- ✅ Disclaimer at the bottom
-
-### 2. Backend API Health Check
-**URL**: http://localhost:8002/health
-
-**Expected Response:**
-```json
-{
-  "status": "healthy",
-  "message": "FHIR Chat API is running"
-}
-```
-
-### 3. Backend API Documentation (Swagger)
-**URL**: http://localhost:8002/docs
-
-**What You'll See:**
-- Interactive API documentation
-- All 10 endpoints listed
-- Try out functionality for each endpoint
-
-### 4. Backend API Alternative Docs (ReDoc)
-**URL**: http://localhost:8002/redoc
-
-**What You'll See:**
-- Alternative documentation view
-- Better for reading/understanding API structure
-
----
-
-## 🎯 Full Integration Test Flow
-
-### Test 1: Simple Symptom Assessment
-
-1. Go to http://localhost:3000
-2. In the chat interface, type: **"I have a headache and fever"**
-3. Click "Send" or press Enter
-4. Watch for:
-   - ✅ Message appears in chat
-   - ✅ Loading indicator shows
-   - ✅ Triage results appear on the right panel
-   - ✅ Priority level is assigned (Non-Urgent/Urgent/Emergency)
-   - ✅ Care recommendations are shown
-   - ✅ Extracted symptoms are listed
-
-### Test 2: Emergency Symptom
-
-1. Reset or refresh the page
-2. Type: **"I'm having severe chest pain and difficulty breathing"**
-3. Expected Results:
-   - ✅ Priority: **EMERGENCY**
-   - ✅ Care Level: **Emergency Department - Immediate**
-   - ✅ Red/urgent styling
-   - ✅ Symptoms extracted: chest pain (severe), breathing difficulty
-
-### Test 3: Mild Symptom
-
-1. Reset or refresh the page
-2. Type: **"I have a mild headache"**
-3. Expected Results:
-   - ✅ Priority: **NON_URGENT**
-   - ✅ Care Level: Lower priority care
-   - ✅ Green/low-priority styling
-
-### Test 4: API Direct Test
-
-Open browser console and test API directly:
-
-```javascript
-// Test health check
-fetch('http://localhost:8002/health')
-  .then(r => r.json())
-  .then(console.log);
-
-// Test triage endpoint
-fetch('http://localhost:8002/api/v1/triage', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({
-    message: "I have fever and cough",
-    patient_id: null,
-    symptoms: null
-  })
-})
-  .then(r => r.json())
-  .then(console.log);
-```
-
----
-
-## 📊 Test Coverage Summary
-
-### Backend Tests: 35 Passing ✅
-- Chat Service: 9 tests
-- Triage Service: 14 tests
-- API Integration: 11 tests
-- API Endpoints: 1 test
-- Code Coverage: 68%
-
-### Frontend Tests: 4 Passing ✅
-- Component rendering tests
-- UI element presence tests
-
-**Total**: 39 automated tests passing
-
----
-
-## 🔍 Troubleshooting
-
-### Backend won't start?
+**Run it**:
 ```bash
-# Check if port 8002 is in use
-lsof -i :8002
-
-# If it is, kill the process
-kill -9 <PID>
-
-# Or use a different port by editing main.py line 417
+./test-cloudrun-deployment.sh
 ```
 
-### Frontend shows "API Disconnected"?
-1. Ensure backend is running on port 8002
-2. Check backend logs for errors
-3. Test http://localhost:8002/health directly
-4. Check browser console for CORS errors
+**Tests**:
+- Health checks
+- Llama API
+- Chat with 12 different patient scenarios
+- Appointment scheduling
+- Test ordering
 
-### OpenAI API errors?
-- Verify `.env` file has valid `OPENAI_API_KEY`
-- Check OpenAI account has credits
-- Backend will log OpenAI errors
-
-### FHIR Server errors?
-- Public HAPI FHIR server may be slow/unavailable
-- Most features work without FHIR (patient_id is optional)
+**Time**: ~2-3 minutes
 
 ---
 
-## 🎉 Success Criteria
+#### 4. `run_all_tests.sh`
+**What it tests**: All Python backend tests
 
-Your system is fully wired and working when:
+**Run it**:
+```bash
+./run_all_tests.sh
+```
 
-- ✅ Backend starts without errors on port 8002
-- ✅ Frontend starts and shows "Connected to API"
-- ✅ You can submit symptoms and receive triage results
-- ✅ Symptoms are correctly extracted and displayed
-- ✅ Priority levels match symptom severity
-- ✅ Care recommendations are appropriate
-- ✅ All tests pass (run `pytest` and `npm test`)
-- ✅ Swagger docs accessible at http://localhost:8002/docs
+**Tests**:
+- API endpoints (test_api.py)
+- Chat service (test_chat_service.py)
+- Integration (test_integration.py)
+- Triage service (test_triage_service.py)
 
----
-
-## 📝 Quick Reference
-
-| Component | URL | Purpose |
-|-----------|-----|---------|
-| **Frontend** | http://localhost:3000 | Main application UI |
-| **Backend API** | http://localhost:8002 | REST API server |
-| **Health Check** | http://localhost:8002/health | API status |
-| **Swagger Docs** | http://localhost:8002/docs | Interactive API docs |
-| **ReDoc** | http://localhost:8002/redoc | Alternative API docs |
+**Time**: ~1-2 minutes
 
 ---
 
-**System Status**: ✅ All components wired and tested
-**Last Verified**: 2025-11-10
+### **Feature-Specific Tests**
+
+#### 5. `test_intelligent_triage.sh`
+**What it tests**: Intelligent triage service
+
+**Run it**:
+```bash
+./test_intelligent_triage.sh
+```
+
+**Tests patient triage workflows**
+
+---
+
+#### 6. `test-scheduling-flow.mjs`
+**What it tests**: Appointment scheduling
+
+**Run it**:
+```bash
+node test-scheduling-flow.mjs
+```
+
+**Tests scheduling API and workflows**
+
+---
+
+#### 7. `test_llama.py`
+**What it tests**: Llama 4 AI integration
+
+**Run it**:
+```bash
+python test_llama.py
+```
+
+**Tests direct Llama API calls**
+
+---
+
+## 📋 Recommended Testing Flow
+
+### For Quick Verification (5 minutes)
+```bash
+# 1. Test complete deployment
+./test-complete-deployment.sh
+
+# If all pass ✅ - you're done!
+# If failures ❌ - check specific services
+```
+
+---
+
+### For Thorough Testing (10 minutes)
+```bash
+# 1. Complete deployment test
+./test-complete-deployment.sh
+
+# 2. Run comprehensive Cloud Run tests
+./test-cloudrun-deployment.sh
+
+# 3. Test specific features
+./test_intelligent_triage.sh
+node test-scheduling-flow.mjs
+```
+
+---
+
+### For Full QA (30 minutes)
+```bash
+# 1. Complete deployment
+./test-complete-deployment.sh
+
+# 2. All Cloud Run tests
+./test-cloudrun-deployment.sh
+
+# 3. All Python backend tests
+./run_all_tests.sh
+
+# 4. Feature-specific tests
+./test_intelligent_triage.sh
+node test-scheduling-flow.mjs
+python test_llama.py
+```
+
+---
+
+## 🎯 Manual Testing
+
+### Test Frontend in Browser
+```bash
+open https://medichat-frontend-820444130598.us-east5.run.app
+```
+
+**Test scenarios**:
+1. ✅ Homepage loads
+2. ✅ Can navigate to different pages
+3. ✅ Chat interface works
+4. ✅ Can enter messages
+5. ✅ Gets AI responses
+
+---
+
+### Test Backend API Manually
+```bash
+# Health check
+curl https://fhir-chat-api-820444130598.us-east5.run.app/health
+
+# Llama test
+curl https://fhir-chat-api-820444130598.us-east5.run.app/llama/test
+
+# Chat
+curl -X POST https://fhir-chat-api-820444130598.us-east5.run.app/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "patient_id": "test-123",
+    "user_message": "What is my health status?"
+  }'
+```
+
+---
+
+### Test HAPI FHIR Manually
+```bash
+# Metadata
+curl http://34.162.139.26:8080/fhir/metadata | jq .
+
+# Search patients
+curl http://34.162.139.26:8080/fhir/Patient
+
+# Create test patient
+curl -X POST http://34.162.139.26:8080/fhir/Patient \
+  -H "Content-Type: application/fhir+json" \
+  -d '{
+    "resourceType": "Patient",
+    "name": [{
+      "family": "Test",
+      "given": ["Demo"]
+    }],
+    "gender": "male",
+    "birthDate": "1990-01-01"
+  }'
+
+# Get patient by ID
+curl http://34.162.139.26:8080/fhir/Patient/1
+```
+
+---
+
+## 🔍 Troubleshooting Failed Tests
+
+### Frontend Tests Fail
+```bash
+# Check frontend logs
+gcloud run services logs tail medichat-frontend --region=us-east5
+
+# Check if frontend is accessible
+curl -I https://medichat-frontend-820444130598.us-east5.run.app
+```
+
+---
+
+### Backend Tests Fail
+```bash
+# Check backend logs
+gcloud run services logs tail fhir-chat-api --region=us-east5
+
+# Check backend health
+curl https://fhir-chat-api-820444130598.us-east5.run.app/health
+
+# Check Llama API access
+curl https://fhir-chat-api-820444130598.us-east5.run.app/llama/test
+```
+
+---
+
+### HAPI FHIR Tests Fail
+```bash
+# SSH into VM
+gcloud compute ssh hapi-fhir-vm --zone=us-east5-a
+
+# Check containers
+docker ps
+
+# Check HAPI logs
+docker logs hapi-fhir --tail=100
+
+# Check Cloud SQL Proxy logs
+docker logs cloud-sql-proxy
+
+# Restart services
+cd /opt/hapi-fhir && docker-compose restart
+```
+
+---
+
+## 📊 Test Results Interpretation
+
+### All Tests Pass ✅
+Your deployment is fully operational! You can:
+- Access the frontend
+- Use the AI chat
+- Access patient data via FHIR
+- All integrations working
+
+### Some Tests Fail ❌
+
+**Frontend fails**:
+- Check Cloud Run deployment
+- Verify build succeeded
+- Check nginx configuration
+
+**Backend fails**:
+- Check Llama API credentials
+- Verify service account has permissions
+- Check FHIR_SERVER_URL environment variable
+
+**HAPI FHIR fails**:
+- Check VM is running
+- Verify containers are up
+- Check Cloud SQL connection
+- Verify IAM permissions for VM
+
+**Integration fails**:
+- Check network connectivity between services
+- Verify FHIR_SERVER_URL in backend
+- Check CORS configuration
+
+---
+
+## 🎓 Test Patient Data
+
+### Available Test Patients (in ALL_TEST_PATIENTS.md)
+
+| Patient ID | Scenario | Priority |
+|------------|----------|----------|
+| 21033 | HIGH Penicillin Allergy | 🔴 CRITICAL |
+| 21043 | Pediatric + SEVERE Cashew Allergy | 🔴 CRITICAL |
+| 21003 | Emergency Cardiac Symptoms | 🟠 HIGH |
+| 21011 | Complex Geriatric Cardiac | 🟠 HIGH |
+| 21058 | Multi-System Disease | 🟠 HIGH |
+
+Use these in your tests for realistic scenarios.
+
+---
+
+## ✅ Testing Checklist
+
+Before going to production, verify:
+
+- [ ] Frontend loads and is responsive
+- [ ] Backend health check passes
+- [ ] Llama 4 AI responds correctly
+- [ ] HAPI FHIR metadata accessible
+- [ ] Can create/read patient data in FHIR
+- [ ] Chat functionality works end-to-end
+- [ ] Triage service works
+- [ ] Scheduling functionality works
+- [ ] All test scripts pass
+- [ ] Manual testing of key workflows successful
+
+---
+
+## 📞 Need Help?
+
+If tests fail:
+1. Check logs (see Troubleshooting section)
+2. Review `COMPLETE_GCP_DEPLOYMENT.md`
+3. Verify all services are running:
+   - Frontend: `gcloud run services describe medichat-frontend --region=us-east5`
+   - Backend: `gcloud run services describe fhir-chat-api --region=us-east5`
+   - HAPI VM: `gcloud compute instances describe hapi-fhir-vm --zone=us-east5-a`
+
+---
+
+**Happy Testing!** 🧪✨

@@ -86,12 +86,17 @@ services:
       - TRIBAL_DB_NAME=tribal_knowledge
       - TRIBAL_DB_USER=tribaluser
       - TRIBAL_DB_PASSWORD=tribalpassword
+      # Google Cloud AI Platform
+      - PROJECT_ID=${PROJECT_ID:-project-c78515e0-ee8f-4282-a3c}
+      - ENDPOINT=${ENDPOINT:-us-east5-aiplatform.googleapis.com}
+      - REGION=${REGION:-us-east5}
+      - GOOGLE_CLOUD_PROJECT=project-c78515e0-ee8f-4282-a3c
     env_file:
       - .env
     volumes:
       # Mount code for development (comment out for production)
       - ./main.py:/app/main.py
-      - ./config.py:/app/config.py
+      - ./config:/app/config
       - ./fhir_client.py:/app/fhir_client.py
       - ./chat_service.py:/app/chat_service.py
       - ./models.py:/app/models.py
@@ -99,6 +104,10 @@ services:
       - ./scheduling_service.py:/app/scheduling_service.py
       - ./scheduling_schemas.py:/app/scheduling_schemas.py
       - ./tribal_knowledge_service.py:/app/tribal_knowledge_service.py
+      - ./llama_service.py:/app/llama_service.py
+      - ./llama_api.py:/app/llama_api.py
+      # Mount gcloud credentials (for authentication without service account keys)
+      - ~/.config/gcloud:/home/appuser/.config/gcloud
     depends_on:
       - hapi-fhir
       - postgres-tribal

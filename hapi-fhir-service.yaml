@@ -1,0 +1,58 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: hapi-fhir
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/cloudsql-instances: project-c78515e0-ee8f-4282-a3c:us-east5:medichat-postgres
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '10'
+        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/cloudsql-instances: project-c78515e0-ee8f-4282-a3c:us-east5:medichat-postgres
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+      - image: gcr.io/project-c78515e0-ee8f-4282-a3c/hapi-fhir:latest
+        ports:
+        - name: http1
+          containerPort: 8080
+        env:
+        - name: spring.datasource.url
+          value: "jdbc:postgresql://localhost/hapi?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=project-c78515e0-ee8f-4282-a3c:us-east5:medichat-postgres"
+        - name: spring.datasource.username
+          value: "hapiuser"
+        - name: spring.datasource.password
+          value: "HapiSecure2026!"
+        - name: spring.datasource.driverClassName
+          value: "org.postgresql.Driver"
+        - name: spring.jpa.properties.hibernate.dialect
+          value: "ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect"
+        - name: hapi.fhir.allow_external_references
+          value: "true"
+        - name: hapi.fhir.auto_create_placeholder_reference_targets
+          value: "true"
+        - name: hapi.fhir.default_encoding
+          value: "JSON"
+        resources:
+          limits:
+            memory: 4Gi
+            cpu: '2'
+        startupProbe:
+          httpGet:
+            path: /fhir/metadata
+            port: 8080
+          initialDelaySeconds: 60
+          timeoutSeconds: 10
+          periodSeconds: 30
+          failureThreshold: 10
+        livenessProbe:
+          httpGet:
+            path: /fhir/metadata
+            port: 8080
+          initialDelaySeconds: 0
+          timeoutSeconds: 10
+          periodSeconds: 30

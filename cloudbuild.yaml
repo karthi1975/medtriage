@@ -1,0 +1,10 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'Dockerfile.cloudrun',
+      '-t', 'gcr.io/project-c78515e0-ee8f-4282-a3c/fhir-chat-api:latest',
+      '.'
+    ]
+images:
+  - 'gcr.io/project-c78515e0-ee8f-4282-a3c/fhir-chat-api:latest'

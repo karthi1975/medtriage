@@ -444,11 +444,40 @@ async def ma_chat(request: MAChatRequest, db: Session = Depends(get_db)):
 
                     logger.info(f"Triage result: {triage_result}")
 
+                    # Extract risk assessment and map to expected structure
+                    risk_assessment = triage_result.get('risk_assessment', {})
+                    immediate_actions = triage_result.get('immediate_actions', [])
+
+                    # Map risk_level (HIGH/MODERATE/LOW) to priority (CRITICAL/HIGH/MEDIUM/LOW)
+                    risk_level = risk_assessment.get('risk_level', 'MODERATE')
+                    priority_mapping = {
+                        'HIGH': 'CRITICAL',
+                        'MODERATE': 'MEDIUM',
+                        'LOW': 'LOW'
+                    }
+                    priority = priority_mapping.get(risk_level, 'MEDIUM')
+
+                    # Calculate confidence from risk score (0-5 scale to 0-1)
+                    risk_score = risk_assessment.get('risk_score', 0)
+                    confidence = min(risk_score / 5.0 + 0.5, 1.0)  # Add base 0.5 for any triage
+
+                    # Get ma_summary for reasoning
+                    ma_summary = triage_result.get('ma_summary', 'Triage assessment completed')
+
+                    # Extract recommendations from immediate actions
+                    recommendations = [
+                        action.get('action') for action in immediate_actions
+                        if action.get('urgency') in ['immediate', 'urgent']
+                    ]
+
                     action_results['triage'] = {
-                        'priority': triage_result.get('priority', 'MEDIUM'),
-                        'reasoning': triage_result.get('reasoning', 'Triage assessment completed'),
-                        'confidence': triage_result.get('confidence', 0.75),
-                        'recommendations': triage_result.get('recommendations', [])
+                        'priority': priority,
+                        'reasoning': ma_summary,
+                        'confidence': confidence,
+                        'recommendations': recommendations,
+                        'risk_level': risk_level,
+                        'risk_factors': risk_assessment.get('risk_factors', []),
+                        'protocol': triage_result.get('protocol', {}).get('name') if triage_result.get('protocol_activated') else None
                     }
 
                     # Auto-check testing requirements
@@ -467,7 +496,9 @@ async def ma_chat(request: MAChatRequest, db: Session = Depends(get_db)):
                         'formatted_message': formatted_testing
                     }
 
-                    actions_taken.append(f"Triage completed: {triage_result.get('priority')} priority")
+                    actions_taken.append(f"Triage completed: {priority} priority ({risk_level} risk)")
+                    if triage_result.get('protocol_activated'):
+                        actions_taken.append(f"Protocol activated: {triage_result.get('protocol', {}).get('name')}")
                     actions_taken.append("Checked testing requirements")
 
                 except Exception as e:

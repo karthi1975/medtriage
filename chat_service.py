@@ -540,7 +540,24 @@ Only include entities that are explicitly mentioned in the message."""
 
             if action_results.get('triage'):
                 triage = action_results['triage']
-                result_summary += f"Triage: {triage.get('priority')} priority\nReasoning: {triage.get('reasoning')}\n"
+                priority = triage.get('priority', 'MEDIUM')
+                risk_level = triage.get('risk_level', 'MODERATE')
+                protocol = triage.get('protocol')
+                risk_factors = triage.get('risk_factors', [])
+
+                result_summary += f"Triage: {priority} priority ({risk_level} risk)\n"
+
+                if protocol:
+                    result_summary += f"Protocol: {protocol}\n"
+
+                if risk_factors:
+                    result_summary += f"Risk Factors: {', '.join(risk_factors)}\n"
+
+                result_summary += f"Reasoning: {triage.get('reasoning')}\n"
+
+                recommendations = triage.get('recommendations', [])
+                if recommendations:
+                    result_summary += f"Immediate Actions: {', '.join(recommendations)}\n"
 
             if action_results.get('testing_status'):
                 testing = action_results['testing_status']
@@ -577,18 +594,61 @@ Keep response to 2-3 sentences unless more detail is critical."""
                 {"role": "user", "content": "Generate response"}
             ]
 
-            logger.info("Generating conversational response")
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=300
-            )
+            # Use Llama for response generation if available
+            if self.llama_service:
+                logger.info("Generating conversational response with Llama 4")
+                try:
+                    response = self.llama_service.chat_completion(
+                        messages=messages,
+                        temperature=0.7,
+                        max_tokens=300
+                    )
 
-            conversational_response = response.choices[0].message.content
-            logger.info("Generated conversational response")
+                    if response and response.get('choices'):
+                        conversational_response = response['choices'][0]['message']['content']
+                        logger.info("Generated conversational response with Llama 4")
+                        return conversational_response
+                except Exception as e:
+                    logger.warning(f"Llama response generation failed: {e}, using direct summary")
 
-            return conversational_response
+            # Fallback: For triage, use ma_summary directly to avoid OpenAI dependency
+            if action_results.get('triage') and action_results['triage'].get('reasoning'):
+                logger.info("Using triage ma_summary as conversational response")
+                triage = action_results['triage']
+                response_parts = []
+
+                # Add triage priority
+                response_parts.append(f"🚨 TRIAGE: {triage.get('priority')} PRIORITY")
+
+                # Add protocol if activated
+                if triage.get('protocol'):
+                    response_parts.append(f"Protocol: {triage.get('protocol')}")
+
+                # Add risk factors
+                risk_factors = triage.get('risk_factors', [])
+                if risk_factors:
+                    response_parts.append(f"Risk Factors: {', '.join(risk_factors)}")
+
+                # Add immediate actions/recommendations
+                recommendations = triage.get('recommendations', [])
+                if recommendations:
+                    response_parts.append("\nImmediate Actions Required:")
+                    for rec in recommendations:
+                        response_parts.append(f"  • {rec}")
+
+                # Add testing if available
+                if action_results.get('testing_status'):
+                    testing = action_results['testing_status']
+                    if testing.get('needs_urgent_testing'):
+                        response_parts.append("\n⚠️ Urgent testing required - see details below")
+
+                return "\n".join(response_parts)
+
+            # Last resort: basic structured response
+            if result_summary:
+                return result_summary.strip()
+
+            return "I've processed your request. What would you like to do next?"
 
         except Exception as e:
             logger.error(f"Error generating conversational response: {str(e)}")

@@ -24,7 +24,7 @@ class FacilityInfo(BaseModel):
     address: str
     city: str
     region: str
-    phone: str
+    phone: Optional[str] = None
 
 
 class SlotRecommendation(BaseModel):
@@ -69,6 +69,7 @@ class AppointmentBookingRequest(BaseModel):
     urgency: str
     reason_for_visit: Optional[str] = None
     triage_session_id: Optional[str] = None
+    created_by: Optional[str] = "SYSTEM"  # MA name or system user
 
 
 class AppointmentBookingResponse(BaseModel):

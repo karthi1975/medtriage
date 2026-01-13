@@ -369,7 +369,8 @@ class SchedulingService:
         duration_minutes: int,
         urgency: str,
         triage_session_id: Optional[str] = None,
-        reason_for_visit: Optional[str] = None
+        reason_for_visit: Optional[str] = None,
+        created_by: Optional[str] = "SYSTEM"
     ) -> Dict[str, Any]:
         """Book an appointment with race condition handling"""
         import uuid
@@ -397,7 +398,8 @@ class SchedulingService:
             status="scheduled",
             reason_for_visit=reason_for_visit,
             triage_session_id=triage_session_id,
-            confirmation_number=str(uuid.uuid4().hex[:8].upper())
+            confirmation_number=str(uuid.uuid4().hex[:8].upper()),
+            created_by=created_by
         )
 
         self.db.add(appointment)

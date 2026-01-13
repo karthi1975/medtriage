@@ -35,6 +35,13 @@ chroma_db/
 .env
 .env.local
 
+# Google Cloud Service Account Keys (NEVER COMMIT THESE!)
+*service-account*.json
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+
 # Test Results
 *_results.json
 *_comparison.json

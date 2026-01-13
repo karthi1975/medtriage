@@ -1,0 +1,19 @@
+# Dockerfile for HAPI FHIR Server on Cloud Run
+# Uses Cloud Run's built-in Cloud SQL Unix socket connection
+FROM hapiproject/hapi:latest
+
+# Expose port 8080 (HAPI FHIR default)
+EXPOSE 8080
+
+# Health check endpoint: /fhir/metadata
+# Cloud Run will use this for health checks
+
+# Cloud Run provides Cloud SQL connection via Unix socket at:
+# /cloudsql/PROJECT:REGION:INSTANCE
+
+# Environment variables will be set during Cloud Run deployment:
+# - spring.datasource.url (using Unix socket path)
+# - spring.datasource.username
+# - spring.datasource.password
+# - spring.datasource.driverClassName
+# - spring.jpa.properties.hibernate.dialect
