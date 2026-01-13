@@ -309,7 +309,24 @@ Only extract symptoms that are explicitly mentioned. If severity, duration, or l
         current_patient = conversation_context.get('current_patient') if conversation_context else None
 
         # PRIORITY 1: If current patient exists and message has symptoms, it's TRIAGE
-        symptom_keywords = ['pain', 'hurt', 'ache', 'fever', 'cough', 'nausea', 'dizzy', 'bleeding', 'swelling', 'chest', 'headache', 'shortness of breath', 'sob', 'vomiting', 'diarrhea', 'rash', 'weakness', 'numbness', 'confusion']
+        symptom_keywords = [
+            # Pain-related
+            'pain', 'hurt', 'ache', 'sore', 'tender', 'discomfort',
+            # Respiratory
+            'breath', 'breathing', 'shortness of breath', 'sob', 'cough', 'wheez',
+            # Neurological
+            'dizzy', 'dizziness', 'weakness', 'numbness', 'confusion', 'droop', 'droopy', 'facial droop', 'slurred', 'speech',
+            # Cardiovascular
+            'chest', 'palpitations', 'racing heart', 'crushing',
+            # Gastrointestinal
+            'nausea', 'vomiting', 'diarrhea', 'vomit',
+            # Dermatological
+            'rash', 'swelling', 'swollen', 'bleeding', 'wound', 'ulcer',
+            # General/Systemic
+            'fever', 'temperature', 'chills', 'sweating', 'fatigue',
+            # Emergency keywords
+            'can\'t get up', 'fell', 'fall', 'collapsed'
+        ]
         has_symptoms = any(keyword in message_lower for keyword in symptom_keywords)
 
         if current_patient and has_symptoms:

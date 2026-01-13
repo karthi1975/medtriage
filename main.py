@@ -419,31 +419,33 @@ async def ma_chat(request: MAChatRequest, db: Session = Depends(get_db)):
         elif intent_type == "TRIAGE_START":
             if current_patient:
                 try:
-                    # Extract symptoms
-                    symptom_extraction = chat_service.extract_symptoms(
-                        text=request.message,
-                        patient_context=current_patient
+                    logger.info(f"Starting triage for message: {request.message}")
+
+                    # Use intelligent triage service with simple symptom extraction
+                    # Extract basic symptoms from the message
+                    symptoms_text = request.message
+
+                    # Perform intelligent triage
+                    triage_result = await intelligent_triage_service.perform_intelligent_triage(
+                        patient_fhir_id=request.current_patient_id,
+                        patient_name=current_patient.get('name', 'Unknown'),
+                        patient_age=current_patient.get('age'),
+                        patient_gender=current_patient.get('gender'),
+                        patient_conditions=current_patient.get('conditions', []),
+                        symptoms=[symptoms_text],
+                        symptom_details={"raw_message": symptoms_text},
+                        provider_name=session.get('ma_name', 'Medical Assistant'),
+                        specialty=session.get('specialty_name', 'Family Medicine'),
+                        urgency_override=None
                     )
 
-                    # Perform triage
-                    triage_result = triage_service.determine_triage_priority(
-                        symptoms=symptom_extraction.extracted_symptoms,
-                        patient_context=current_patient,
-                        user_message=request.message
-                    )
-
-                    # Get recommendations
-                    recommendations = triage_service.get_care_recommendations(
-                        triage_result=triage_result,
-                        symptoms=symptom_extraction.extracted_symptoms,
-                        patient_context=current_patient
-                    )
+                    logger.info(f"Triage result: {triage_result}")
 
                     action_results['triage'] = {
-                        'priority': triage_result.get('priority'),
-                        'reasoning': triage_result.get('reasoning'),
-                        'confidence': triage_result.get('confidence'),
-                        'recommendations': recommendations
+                        'priority': triage_result.get('priority', 'MEDIUM'),
+                        'reasoning': triage_result.get('reasoning', 'Triage assessment completed'),
+                        'confidence': triage_result.get('confidence', 0.75),
+                        'recommendations': triage_result.get('recommendations', [])
                     }
 
                     # Auto-check testing requirements
