@@ -3,6 +3,15 @@
  * Google Material Design inspired theme for MediChat MA Assistant
  */
 import { createTheme } from '@mui/material/styles';
+import {
+  shapeCorner,
+  motion as motionTokens,
+  elevationTint as elevationTintTokens,
+  priority as priorityTokens,
+  chatBubble,
+  m3Light,
+  m3Typography,
+} from './tokens';
 
 // Color palette (Healthcare-optimized Google Material Design)
 export const colors = {
@@ -69,10 +78,18 @@ const theme = createTheme({
       paper: colors.surface,
     },
     divider: colors.divider,
+    m3: m3Light,
+    priority: priorityTokens,
+    chat: chatBubble,
   },
+
+  corner: shapeCorner,
+  motion: motionTokens,
+  elevationTint: elevationTintTokens,
 
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    ...m3Typography,
     h4: {
       fontSize: '2rem',      // 32px
       lineHeight: '2.5rem',  // 40px
