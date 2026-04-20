@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
+import { useTheme } from '@mui/material/styles';
 import { useMASession } from '../context/MASessionContext';
 import { useChat } from '../context/ChatContext';
 import { useWorkflow } from '../context/WorkflowContext';
@@ -39,6 +40,7 @@ import { TopAppBarSmall, SideSheet } from '../components/md3';
 export const ChatView: React.FC = () => {
   const navigate = useNavigate();
   const { mode } = useThemeMode();
+  const theme = useTheme();
   const [rightSheetOpen, setRightSheetOpen] = useState(true);
   const { session, logout } = useMASession();
   const { currentPatient, clearChat, messages } = useChat();
@@ -127,9 +129,11 @@ export const ChatView: React.FC = () => {
   }
 
   if (mode === 'm3') {
+    const canvasBg = theme.palette.m3?.surfaceContainerLow ?? theme.palette.background.default;
     return (
-      <Box display="flex" flexDirection="column" height="100vh" bgcolor="background.default">
-        <TopAppBarSmall
+      <Box display="flex" flexDirection="column" height="100vh" sx={{ bgcolor: canvasBg }}>
+        <Box sx={{ position: 'relative' }}>
+          <TopAppBarSmall
           leading={
             <Box
               component="img"
@@ -172,9 +176,24 @@ export const ChatView: React.FC = () => {
             </Stack>
           }
         />
+          <Box
+            aria-hidden
+            sx={{
+              height: 2,
+              background: 'linear-gradient(90deg, #1A73E8 0%, #34A853 100%)',
+              opacity: 0.85,
+            }}
+          />
+        </Box>
 
         <Box display="flex" flex={1} overflow="hidden">
-          <Box flex={1} display="flex" flexDirection="column" minWidth={0}>
+          <Box
+            flex={1}
+            display="flex"
+            flexDirection="column"
+            minWidth={0}
+            sx={{ bgcolor: canvasBg }}
+          >
             <ChatMessagesM3 />
             <ChatInputM3 />
           </Box>
@@ -183,6 +202,7 @@ export const ChatView: React.FC = () => {
             onClose={() => setRightSheetOpen(false)}
             title="Patient context"
             width={420}
+            headerTint
           >
             <RightPanelContent />
           </SideSheet>

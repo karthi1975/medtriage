@@ -17,7 +17,8 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Paper
+  Paper,
+  useTheme,
 } from '@mui/material';
 import {
   Warning as WarningIcon,
@@ -40,11 +41,14 @@ const ProtocolActivationCard: React.FC<ProtocolActivationCardProps> = ({
   onActionComplete,
   completedActions = []
 }) => {
+  const theme = useTheme();
   const { protocol, risk_assessment, patient, provider_preferences } = triageResult;
 
   if (!protocol) {
     return null;
   }
+
+  const tonalBg = theme.palette.m3?.surfaceContainerLowest ?? theme.palette.grey[50];
 
   // Get risk color
   const getRiskColor = (level: string) => {
@@ -77,9 +81,12 @@ const ProtocolActivationCard: React.FC<ProtocolActivationCardProps> = ({
     <Card
       sx={{
         mb: 3,
-        border: '2px solid',
-        borderColor: getPriorityColor(protocol.priority) + '.main',
-        boxShadow: 3
+        borderLeft: '4px solid',
+        borderLeftColor: getPriorityColor(protocol.priority) + '.main',
+        border: `1px solid ${theme.palette.m3?.outlineVariant ?? theme.palette.divider}`,
+        borderLeftWidth: 4,
+        boxShadow: '0 1px 2px rgba(60,64,67,0.08), 0 4px 12px rgba(60,64,67,0.05)',
+        borderRadius: `${theme.corner.medium}px`,
       }}
     >
       <CardContent>
@@ -127,7 +134,7 @@ const ProtocolActivationCard: React.FC<ProtocolActivationCardProps> = ({
             </Box>
 
             {risk_assessment.risk_factors && risk_assessment.risk_factors.length > 0 && (
-              <Paper variant="outlined" sx={{ p: 2, mt: 1, bgcolor: 'grey.50' }}>
+              <Paper variant="outlined" sx={{ p: 2, mt: 1, bgcolor: tonalBg, borderColor: theme.palette.m3?.outlineVariant ?? theme.palette.divider }}>
                 <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                   Risk Factors:
                 </Typography>

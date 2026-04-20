@@ -111,7 +111,7 @@ export const ChatMessagesM3: React.FC = () => {
                   borderRadius: bubbleRadius,
                   px: 2,
                   py: 1.25,
-                  boxShadow: 'none',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
                   minWidth: 0,
                 }}
               >

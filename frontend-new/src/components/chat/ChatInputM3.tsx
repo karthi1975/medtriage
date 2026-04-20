@@ -36,7 +36,8 @@ export const ChatInputM3: React.FC = () => {
         p: 2,
         borderTop: '1px solid',
         borderColor: 'divider',
-        bgcolor: theme.palette.m3?.surfaceContainerLow ?? 'background.paper',
+        bgcolor: theme.palette.m3?.surface ?? 'background.paper',
+        boxShadow: '0 -4px 16px rgba(60,64,67,0.04)',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1 }}>

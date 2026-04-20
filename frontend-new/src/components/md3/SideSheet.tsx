@@ -20,6 +20,9 @@ export interface SideSheetProps {
   onClose?: () => void;
   title?: React.ReactNode;
   width?: number;
+  /** When true, the header uses a tinted surface (surfaceContainerLow) so it
+   *  reads as a "title bar" against lighter body content. */
+  headerTint?: boolean;
   children?: React.ReactNode;
 }
 
@@ -28,6 +31,7 @@ export const SideSheet: React.FC<SideSheetProps> = ({
   onClose,
   title,
   width = 400,
+  headerTint = false,
   children,
 }) => {
   const theme = useTheme();
@@ -35,6 +39,9 @@ export const SideSheet: React.FC<SideSheetProps> = ({
 
   const divider = theme.palette.m3?.outlineVariant ?? theme.palette.divider;
   const surface = theme.palette.m3?.surface ?? theme.palette.background.paper;
+  const headerBg = headerTint
+    ? theme.palette.m3?.surfaceContainerLow ?? surface
+    : surface;
 
   const header = (title || onClose) && (
     <Box
@@ -45,6 +52,7 @@ export const SideSheet: React.FC<SideSheetProps> = ({
         alignItems: 'center',
         borderBottom: `1px solid ${divider}`,
         minHeight: 56,
+        backgroundColor: headerBg,
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
