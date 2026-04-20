@@ -1,8 +1,13 @@
 /**
  * Main Chat View Page
- * Primary MA interface with chat and context panels
+ * Primary MA interface with chat and context panels.
+ *
+ * Hooks + effects are shared across both rendering paths. The component
+ * branches at the return on theme mode: m3 renders a Material-3 shell using
+ * the md3 primitives (TopAppBarSmall, SideSheet, M3 chat bubbles/composer);
+ * legacy renders the original MUI layout unchanged.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -10,22 +15,31 @@ import {
   Toolbar,
   Typography,
   IconButton,
+  Stack,
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { useMASession } from '../context/MASessionContext';
 import { useChat } from '../context/ChatContext';
 import { useWorkflow } from '../context/WorkflowContext';
 import { ChatMessages } from '../components/chat/ChatMessages';
 import { ChatInput } from '../components/chat/ChatInput';
+import { ChatMessagesM3 } from '../components/chat/ChatMessagesM3';
+import { ChatInputM3 } from '../components/chat/ChatInputM3';
 import { PatientSummaryPanel } from '../components/panels/PatientSummaryPanel';
 import { DetailsPanel } from '../components/panels/DetailsPanel';
+import { RightPanelContent } from '../components/panels/RightPanelContent';
 import ProtocolActivationCard from '../components/intelligent-triage/ProtocolActivationCard';
 import TestOrderingTimeline from '../components/intelligent-triage/TestOrderingTimeline';
 import { AppointmentSchedulingPanel } from '../components/intelligent-triage/AppointmentSchedulingPanel';
 import intelligentTriageApi from '../services/intelligentTriageApi';
+import { useThemeMode } from '../theme/ThemeModeProvider';
+import { TopAppBarSmall, SideSheet } from '../components/md3';
 
 export const ChatView: React.FC = () => {
   const navigate = useNavigate();
+  const { mode } = useThemeMode();
+  const [rightSheetOpen, setRightSheetOpen] = useState(true);
   const { session, logout } = useMASession();
   const { currentPatient, clearChat, messages } = useChat();
   const { state: workflowState, markActionComplete, setActiveWorkflow, addScheduledTest, markTestComplete, setSelectedAppointment, resetWorkflow } = useWorkflow();
@@ -110,6 +124,71 @@ export const ChatView: React.FC = () => {
 
   if (!session) {
     return null;
+  }
+
+  if (mode === 'm3') {
+    return (
+      <Box display="flex" flexDirection="column" height="100vh" bgcolor="background.default">
+        <TopAppBarSmall
+          leading={
+            <Box
+              component="img"
+              src="/synaptix-mark.svg"
+              alt=""
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1,
+                boxShadow: '0 2px 6px -1px rgba(26,115,232,0.35)',
+              }}
+            />
+          }
+          title={
+            <Typography variant="titleLarge" component="div" sx={{ letterSpacing: 0.5, lineHeight: 1 }}>
+              <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
+              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Scheduling</Box>
+            </Typography>
+          }
+          trailing={
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                <Typography variant="bodyMedium">{session.ma_name}</Typography>
+                <Typography variant="labelSmall" color="text.secondary">
+                  {session.facility_name} • {session.specialty_name}
+                </Typography>
+              </Box>
+              {!rightSheetOpen && (
+                <IconButton
+                  onClick={() => setRightSheetOpen(true)}
+                  aria-label="Open context panel"
+                  title="Open context panel"
+                >
+                  <MenuOpenIcon />
+                </IconButton>
+              )}
+              <IconButton onClick={handleLogout} aria-label="End shift" title="End shift">
+                <LogoutIcon />
+              </IconButton>
+            </Stack>
+          }
+        />
+
+        <Box display="flex" flex={1} overflow="hidden">
+          <Box flex={1} display="flex" flexDirection="column" minWidth={0}>
+            <ChatMessagesM3 />
+            <ChatInputM3 />
+          </Box>
+          <SideSheet
+            open={rightSheetOpen}
+            onClose={() => setRightSheetOpen(false)}
+            title="Patient context"
+            width={420}
+          >
+            <RightPanelContent />
+          </SideSheet>
+        </Box>
+      </Box>
+    );
   }
 
   return (
