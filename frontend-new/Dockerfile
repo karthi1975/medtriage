@@ -13,8 +13,8 @@ RUN npm ci --legacy-peer-deps
 # Copy source code
 COPY . .
 
-# Set production environment variable (updated to medichat-backend service)
-ENV VITE_API_URL=https://medichat-backend-tg3weve6aq-ul.a.run.app
+# Set production environment variable (current production backend)
+ENV VITE_API_URL=https://medichat-backend-820444130598.us-east5.run.app
 
 # Build for production (skip TypeScript check to allow deployment)
 RUN npx vite build --mode production

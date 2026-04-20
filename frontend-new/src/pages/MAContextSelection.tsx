@@ -73,10 +73,18 @@ export const MAContextSelection: React.FC = () => {
     setSubmitting(true);
 
     try {
+      // Find facility and specialty names from IDs
+      const facility = facilities.find(f => f.id === selectedFacility);
+      const specialty = specialties.find(s => s.id === selectedSpecialty);
+
+      if (!facility || !specialty) {
+        throw new Error('Invalid facility or specialty selection');
+      }
+
       await login({
         ma_name: maName.trim(),
-        facility_id: selectedFacility as number,
-        specialty_id: selectedSpecialty as number,
+        facility: facility.name,
+        specialty: specialty.name,
       });
 
       // Navigation handled by useEffect above
@@ -91,9 +99,14 @@ export const MAContextSelection: React.FC = () => {
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Card>
         <CardContent sx={{ p: 4 }}>
-          <Typography variant="h4" gutterBottom align="center" sx={{ mb: 1 }}>
-            MediChat MA Assistant
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <Box
+              component="img"
+              src="/synaptix-wordmark.svg"
+              alt="SynaptixScheduling"
+              sx={{ height: 56, width: 'auto' }}
+            />
+          </Box>
           <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
             Start Your Shift
           </Typography>

@@ -18,6 +18,7 @@ import { useWorkflow } from '../context/WorkflowContext';
 import { ChatMessages } from '../components/chat/ChatMessages';
 import { ChatInput } from '../components/chat/ChatInput';
 import { PatientSummaryPanel } from '../components/panels/PatientSummaryPanel';
+import { DetailsPanel } from '../components/panels/DetailsPanel';
 import ProtocolActivationCard from '../components/intelligent-triage/ProtocolActivationCard';
 import TestOrderingTimeline from '../components/intelligent-triage/TestOrderingTimeline';
 import { AppointmentSchedulingPanel } from '../components/intelligent-triage/AppointmentSchedulingPanel';
@@ -116,9 +117,23 @@ export const ChatView: React.FC = () => {
       {/* Top App Bar */}
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            MediChat MA Assistant
-          </Typography>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1.25 }}>
+            <Box
+              component="img"
+              src="/synaptix-mark.svg"
+              alt=""
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1,
+                boxShadow: '0 2px 6px -1px rgba(26,115,232,0.35)',
+              }}
+            />
+            <Typography variant="h6" component="div" sx={{ letterSpacing: 0.5, lineHeight: 1 }}>
+              <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
+              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Scheduling</Box>
+            </Typography>
+          </Box>
 
           <Box display="flex" alignItems="center" gap={2}>
             <Box display="flex" flexDirection="column" alignItems="flex-end">
@@ -149,84 +164,111 @@ export const ChatView: React.FC = () => {
           <ChatInput />
         </Box>
 
-        {/* Right: Context Panels (40%) */}
+        {/* Right: Details Panel (40%) - Shows Triage, Tests, Scheduling */}
         <Box
           flex={2}
           p={2}
           bgcolor="background.default"
           sx={{ overflowY: 'auto' }}
         >
-          {/* Show Intelligent Triage Components if Protocol Activated */}
-          {workflowState.activeWorkflow && workflowState.showProtocolCard && (
-            <ProtocolActivationCard
-              triageResult={workflowState.activeWorkflow}
-              onActionComplete={markActionComplete}
-              completedActions={workflowState.completedActions}
-            />
-          )}
+          {(() => {
+            // Get the last assistant message with metadata
+            const lastMessageWithMetadata = [...messages]
+              .reverse()
+              .find(msg => msg.role === 'assistant' && msg.metadata);
 
-          {workflowState.activeWorkflow && workflowState.showTestOrdering && !workflowState.showAppointmentScheduling && (
-            <TestOrderingTimeline
-              triageResult={workflowState.activeWorkflow}
-              scheduledTests={workflowState.scheduledTests}
-              completedTests={workflowState.completedTests}
-              onScheduleTest={(test, date, time) => {
-                console.log('✅ Scheduling test:', test.test, date, time);
+            // If we have metadata, show the DetailsPanel
+            if (lastMessageWithMetadata?.metadata) {
+              const metadata = lastMessageWithMetadata.metadata;
 
-                // Add to scheduled tests in WorkflowContext
-                addScheduledTest({
-                  test_name: test.test,
-                  test_type: test.type || 'laboratory',
-                  scheduled_date: date,
-                  scheduled_time: time,
-                  fasting_required: test.fasting || false,
-                  reason: test.reason,
-                  status: 'scheduled',
-                  scheduled_at: new Date().toISOString()
-                });
+              return (
+                <>
+                  {/* Header with patient name if available */}
+                  {metadata.patient?.patient && (
+                    <Box mb={2} pb={2} borderBottom="1px solid" borderColor="divider">
+                      <Typography variant="h5" gutterBottom>
+                        {metadata.patient.patient.name ?? 'Patient Details'}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        ID: {metadata.patient.patient.id} • {metadata.patient.patient.age ?? 'Unknown'}y • {metadata.patient.patient.gender ?? 'Unknown'}
+                      </Typography>
+                    </Box>
+                  )}
 
-                // Show confirmation (you can add a toast/snackbar here)
-                alert(`✅ Scheduled: ${test.test}\nDate: ${date}\nTime: ${time}\n\nTest has been added to your workflow.`);
-              }}
-              onMarkTestComplete={(test) => {
-                console.log('✅ Marking test complete:', test.test_name);
-                markTestComplete(test);
-                alert(`✅ Test Completed: ${test.test_name}\n\nTest has been marked as complete.`);
-              }}
-              onEmailInstructions={() => {
-                console.log('📧 Emailing instructions to patient');
-                alert('📧 Patient instructions have been emailed!\n\n(Email functionality to be implemented)');
-              }}
-            />
-          )}
+                  {/* Show unified DetailsPanel with all metadata */}
+                  <DetailsPanel metadata={metadata} />
 
-          {/* Show Appointment Scheduling when all tests complete */}
-          {workflowState.activeWorkflow && workflowState.showAppointmentScheduling && (
-            <AppointmentSchedulingPanel
-              triageResult={workflowState.activeWorkflow}
-              onAppointmentBooked={(appointment) => {
-                console.log('✅ Appointment booked:', appointment);
-                setSelectedAppointment(appointment);
-              }}
-            />
-          )}
+                  {/* Legacy workflow components - keep for advanced triage workflows */}
+                  {workflowState.activeWorkflow && workflowState.showProtocolCard && (
+                    <Box mt={3}>
+                      <ProtocolActivationCard
+                        triageResult={workflowState.activeWorkflow}
+                        onActionComplete={markActionComplete}
+                        completedActions={workflowState.completedActions}
+                      />
+                    </Box>
+                  )}
 
-          {/* Show Patient Summary if no workflow active */}
-          {!workflowState.activeWorkflow && currentPatient && (
-            <PatientSummaryPanel patient={currentPatient} />
-          )}
+                  {workflowState.activeWorkflow && workflowState.showTestOrdering && !workflowState.showAppointmentScheduling && (
+                    <Box mt={3}>
+                      <TestOrderingTimeline
+                        triageResult={workflowState.activeWorkflow}
+                        scheduledTests={workflowState.scheduledTests}
+                        completedTests={workflowState.completedTests}
+                        onScheduleTest={(test, date, time) => {
+                          addScheduledTest({
+                            test_name: test.test,
+                            test_type: test.type || 'laboratory',
+                            scheduled_date: date,
+                            scheduled_time: time,
+                            fasting_required: test.fasting || false,
+                            reason: test.reason,
+                            status: 'scheduled',
+                            scheduled_at: new Date().toISOString()
+                          });
+                        }}
+                        onMarkTestComplete={markTestComplete}
+                        onEmailInstructions={() => console.log('Email instructions')}
+                      />
+                    </Box>
+                  )}
 
-          {/* Show welcome message if nothing to display */}
-          {!workflowState.activeWorkflow && !currentPatient && (
-            <Box textAlign="center" mt={8}>
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No Patient Selected
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Start a conversation to look up a patient or describe symptoms
-              </Typography>
-            </Box>
-          )}
+                  {workflowState.activeWorkflow && workflowState.showAppointmentScheduling && (
+                    <Box mt={3}>
+                      <AppointmentSchedulingPanel
+                        triageResult={workflowState.activeWorkflow}
+                        onAppointmentBooked={setSelectedAppointment}
+                      />
+                    </Box>
+                  )}
+                </>
+              );
+            }
+
+            // Fallback: Show Patient Summary if patient selected but no metadata
+            if (currentPatient) {
+              return (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                    Patient Summary
+                  </Typography>
+                  <PatientSummaryPanel patient={currentPatient} />
+                </>
+              );
+            }
+
+            // Welcome message
+            return (
+              <Box textAlign="center" mt={8}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No Patient Selected
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Start a conversation to look up a patient or describe symptoms
+                </Typography>
+              </Box>
+            );
+          })()}
         </Box>
       </Box>
     </Box>
