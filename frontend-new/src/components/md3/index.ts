@@ -24,3 +24,12 @@ export type {
   PriorityChipProps,
   PriorityChipLevel,
 } from './Chips';
+
+export { TopAppBarSmall } from './TopAppBarSmall';
+export type { TopAppBarSmallProps } from './TopAppBarSmall';
+
+export { TopAppBarMedium } from './TopAppBarMedium';
+export type { TopAppBarMediumProps } from './TopAppBarMedium';
+
+export { SideSheet } from './SideSheet';
+export type { SideSheetProps } from './SideSheet';

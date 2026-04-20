@@ -29,6 +29,10 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
 import SendIcon from '@mui/icons-material/Send';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import AddIcon from '@mui/icons-material/Add';
 import { useThemeMode } from '../theme/ThemeModeProvider';
 import {
   PrioritySurface,
@@ -40,7 +44,11 @@ import {
   InputChip,
   SuggestionChip,
   PriorityChip,
+  TopAppBarSmall,
+  TopAppBarMedium,
+  SideSheet,
 } from '../components/md3';
+import { useBreakpoint } from '../hooks/useBreakpoint';
 
 const FilterDemo: React.FC = () => {
   const [selected, setSelected] = React.useState<string[]>(['today']);
@@ -108,6 +116,11 @@ const Swatch: React.FC<{ name: string; value: string; fg?: string }> = ({ name, 
 export const DesignSystemPreview: React.FC = () => {
   const theme = useTheme();
   const { mode, setMode } = useThemeMode();
+  const bp = useBreakpoint();
+  const [sheetOpen, setSheetOpen] = React.useState(true);
+  const [filterSelected, setFilterSelected] = React.useState<string[]>(['today']);
+  const toggleFilter = (key: string) =>
+    setFilterSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   const m3 = theme.palette.m3;
   const priority = theme.palette.priority;
   const chat = theme.palette.chat;
@@ -488,6 +501,167 @@ export const DesignSystemPreview: React.FC = () => {
             </Paper>
           </Section>
         )}
+
+        <Divider sx={{ my: 4 }} />
+        <Typography variant="headlineSmall" gutterBottom>
+          Navigation &amp; structure (Phase 3)
+        </Typography>
+        <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 4 }}>
+          Shell primitives: M3 Small + Medium top app bars, responsive SideSheet,
+          and the <code>useBreakpoint</code> hook for M3 window-size classes.
+          Resize the browser to watch the SideSheet flip between docked and
+          modal, and watch the window-class pill update.
+        </Typography>
+
+        <Section title="Current window class (live)">
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Chip
+              label={`windowClass: ${bp.windowClass}`}
+              color="primary"
+              sx={{ fontFamily: 'monospace' }}
+            />
+            {bp.isMobileLayout && (
+              <Chip label="isMobileLayout" size="small" color="warning" />
+            )}
+            <Typography variant="bodySmall" color="text.secondary">
+              Compact &lt; 600 · Medium 600–839 · Expanded 840–1199 · Large 1200–1599 · ExtraLarge ≥ 1600
+            </Typography>
+          </Stack>
+        </Section>
+
+        <Section title="TopAppBarSmall — 64dp, task-focused surfaces">
+          <Paper
+            variant="outlined"
+            sx={{ overflow: 'hidden', borderRadius: 2, p: 0 }}
+          >
+            <TopAppBarSmall
+              leading={
+                <Box
+                  component="img"
+                  src="/synaptix-mark.svg"
+                  alt=""
+                  sx={{ width: 32, height: 32, borderRadius: 1 }}
+                />
+              }
+              title={
+                <Typography variant="titleLarge" sx={{ letterSpacing: 0.5 }}>
+                  <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
+                  <Box component="span" sx={{ fontWeight: 400 }}>Scheduling</Box>
+                </Typography>
+              }
+              trailing={
+                <>
+                  <IconButton size="small"><SearchIcon /></IconButton>
+                  <IconButton size="small"><LogoutIcon /></IconButton>
+                </>
+              }
+            />
+            <Box sx={{ p: 3, bgcolor: theme.palette.background.default }}>
+              <Typography variant="bodyMedium" color="text.secondary">
+                Main content area. The app bar above is 64dp with a 1px bottom border.
+              </Typography>
+            </Box>
+          </Paper>
+        </Section>
+
+        <Section title="TopAppBarMedium — 112dp+, landing pages with docked filters">
+          <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, p: 0 }}>
+            <TopAppBarMedium
+              leading={<IconButton size="small"><MenuIcon /></IconButton>}
+              trailing={
+                <>
+                  <IconButton size="small"><SearchIcon /></IconButton>
+                  <IconButton size="small"><FilterListIcon /></IconButton>
+                  <Button variant="tonal" size="small" startIcon={<AddIcon />}>New</Button>
+                </>
+              }
+              title="Appointments"
+              supportingText="Sarah Johnson · West Valley City CHC · Today, April 20"
+              dockedBelow={
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <FilterChip
+                    label="Today"
+                    selected={filterSelected.includes('today')}
+                    onClick={() => toggleFilter('today')}
+                  />
+                  <FilterChip
+                    label="This week"
+                    selected={filterSelected.includes('week')}
+                    onClick={() => toggleFilter('week')}
+                  />
+                  <FilterChip
+                    label="Urgent only"
+                    selected={filterSelected.includes('urgent')}
+                    onClick={() => toggleFilter('urgent')}
+                  />
+                  <FilterChip
+                    label="My patients"
+                    selected={filterSelected.includes('mine')}
+                    onClick={() => toggleFilter('mine')}
+                  />
+                </Stack>
+              }
+            />
+            <Box sx={{ p: 3, bgcolor: theme.palette.background.default }}>
+              <Typography variant="bodyMedium" color="text.secondary">
+                List content area. Filter chips above are part of the app bar surface,
+                separated by a 1px top divider.
+              </Typography>
+            </Box>
+          </Paper>
+        </Section>
+
+        <Section title="SideSheet — responsive panel (docked ≥840px, modal below)">
+          <Paper
+            variant="outlined"
+            sx={{
+              overflow: 'hidden',
+              borderRadius: 2,
+              height: 340,
+              display: 'flex',
+            }}
+          >
+            <Box sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="titleMedium">Main content</Typography>
+              <Typography variant="bodyMedium" color="text.secondary">
+                The side sheet behavior depends on the current window class. On Expanded+ widths
+                the panel is inline-docked; on Medium and Compact it flips to a modal drawer so
+                the main area keeps its full width.
+              </Typography>
+              <Box sx={{ mt: 'auto' }}>
+                <Button
+                  variant="tonal"
+                  onClick={() => setSheetOpen((v) => !v)}
+                >
+                  {sheetOpen ? 'Close panel' : 'Open panel'}
+                </Button>
+              </Box>
+            </Box>
+            <SideSheet
+              open={sheetOpen}
+              onClose={() => setSheetOpen(false)}
+              title="Patient details"
+              width={320}
+            >
+              <Stack spacing={1.5}>
+                <Box>
+                  <Typography variant="labelSmall" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Patient
+                  </Typography>
+                  <Typography variant="titleMedium">Robert Williams · 73M</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="labelSmall" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Chief complaint
+                  </Typography>
+                  <Typography variant="bodyMedium">Chest pain · SOB · Hx CHF</Typography>
+                </Box>
+                <Divider />
+                <PriorityChip level="emergency" label="Emergency" />
+              </Stack>
+            </SideSheet>
+          </Paper>
+        </Section>
       </Container>
     </Box>
   );
