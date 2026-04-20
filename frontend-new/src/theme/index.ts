@@ -156,6 +156,35 @@ const theme = createTheme({
           borderRadius: 8, // Less rounded for outlined buttons
         },
       },
+      variants: [
+        {
+          props: { variant: 'tonal' as const },
+          style: {
+            backgroundColor: m3Light.secondaryContainer,
+            color: m3Light.onSecondaryContainer,
+            borderRadius: shapeCorner.full,
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: m3Light.secondaryContainer,
+              filter: 'brightness(0.96)',
+              boxShadow: 'none',
+            },
+          },
+        },
+        {
+          props: { variant: 'elevated' as const },
+          style: {
+            backgroundColor: m3Light.surfaceContainerLow,
+            color: m3Light.primary,
+            borderRadius: shapeCorner.full,
+            boxShadow: '0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15)',
+            '&:hover': {
+              backgroundColor: m3Light.surfaceContainer,
+              boxShadow: '0 2px 4px 0 rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15)',
+            },
+          },
+        },
+      ],
     },
 
     // TextField overrides

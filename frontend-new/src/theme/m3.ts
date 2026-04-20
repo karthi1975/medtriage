@@ -234,7 +234,15 @@ const m3Theme = createTheme({
 
     MuiIconButton: {
       styleOverrides: {
-        root: { borderRadius: shapeCorner.full },
+        root: {
+          borderRadius: shapeCorner.full,
+          minWidth: 48,
+          minHeight: 48,
+          '&:focus-visible': {
+            outline: `2px solid ${m3Light.primary}`,
+            outlineOffset: 2,
+          },
+        },
       },
     },
 

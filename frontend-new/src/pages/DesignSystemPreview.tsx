@@ -7,9 +7,11 @@
 import React from 'react';
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Card,
+  CardContent,
   Chip,
   Container,
   Divider,
@@ -24,7 +26,45 @@ import {
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import PersonIcon from '@mui/icons-material/Person';
+import EventIcon from '@mui/icons-material/Event';
+import SendIcon from '@mui/icons-material/Send';
 import { useThemeMode } from '../theme/ThemeModeProvider';
+import {
+  PrioritySurface,
+  OutlinedCard,
+  FilledTonalCard,
+  ElevatedCard,
+  AssistChip,
+  FilterChip,
+  InputChip,
+  SuggestionChip,
+  PriorityChip,
+} from '../components/md3';
+
+const FilterDemo: React.FC = () => {
+  const [selected, setSelected] = React.useState<string[]>(['today']);
+  const toggle = (key: string) =>
+    setSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  const items: Array<{ key: string; label: string }> = [
+    { key: 'today', label: 'Today' },
+    { key: 'week', label: 'This week' },
+    { key: 'urgent', label: 'Urgent only' },
+    { key: 'mine', label: 'My patients' },
+  ];
+  return (
+    <>
+      {items.map(({ key, label }) => (
+        <FilterChip
+          key={key}
+          label={label}
+          selected={selected.includes(key)}
+          onClick={() => toggle(key)}
+        />
+      ))}
+    </>
+  );
+};
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <Box mb={5}>
@@ -320,6 +360,113 @@ export const DesignSystemPreview: React.FC = () => {
             <TextField label="Patient name" defaultValue="Robert Williams" sx={{ minWidth: 240 }} />
             <TextField label="With helper" helperText="Required" sx={{ minWidth: 240 }} />
             <TextField label="Error" error helperText="Invalid MRN" sx={{ minWidth: 240 }} />
+          </Stack>
+        </Section>
+
+        <Divider sx={{ my: 4 }} />
+        <Typography variant="headlineSmall" gutterBottom>
+          Primitives (md3 library)
+        </Typography>
+        <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 4 }}>
+          Phase 2 components under <code>src/components/md3/</code>. These are
+          theme-aware and intended for reuse across every clinical surface.
+          Phase 4 will swap production flows over to these primitives.
+        </Typography>
+
+        <Section title="PrioritySurface — the clinical priority pattern">
+          <Stack spacing={2}>
+            {(['emergency', 'urgent', 'semiUrgent', 'nonUrgent'] as const).map((lvl) => (
+              <PrioritySurface key={lvl} priority={lvl} interactive>
+                <CardContent>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                    <Box>
+                      <Typography variant="titleMedium">Robert Williams · 73M</Typography>
+                      <Typography variant="bodySmall" color="text.secondary">
+                        Chest pain · SOB · Hx CHF
+                      </Typography>
+                    </Box>
+                    <PriorityChip level={lvl} label={lvl === 'semiUrgent' ? 'Semi-urgent' : lvl === 'nonUrgent' ? 'Routine' : lvl} />
+                  </Stack>
+                </CardContent>
+              </PrioritySurface>
+            ))}
+          </Stack>
+        </Section>
+
+        <Section title="Card variants — Outlined · Filled tonal · Elevated">
+          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+            <OutlinedCard sx={{ width: 260 }}>
+              <CardContent>
+                <Typography variant="titleMedium">Outlined</Typography>
+                <Typography variant="bodySmall" color="text.secondary">
+                  Default. 1px outline, no shadow. Most clinical surfaces.
+                </Typography>
+              </CardContent>
+            </OutlinedCard>
+            <FilledTonalCard sx={{ width: 260 }}>
+              <CardContent>
+                <Typography variant="titleMedium">Filled tonal</Typography>
+                <Typography variant="bodySmall" color="text.secondary">
+                  surfaceContainer. Low-emphasis groupings, side notes.
+                </Typography>
+              </CardContent>
+            </FilledTonalCard>
+            <ElevatedCard interactive sx={{ width: 260 }}>
+              <CardContent>
+                <Typography variant="titleMedium">Elevated · interactive</Typography>
+                <Typography variant="bodySmall" color="text.secondary">
+                  Hover to lift. Reserve for protocol activation and best-match slots.
+                </Typography>
+              </CardContent>
+            </ElevatedCard>
+          </Stack>
+        </Section>
+
+        <Section title="Chip family — Assist · Filter · Input · Suggestion">
+          <Stack spacing={2}>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+              <Typography variant="labelLarge" sx={{ minWidth: 120, color: 'text.secondary' }}>Assist</Typography>
+              <AssistChip icon={<PersonIcon />} label="Add patient" onClick={() => {}} />
+              <AssistChip icon={<EventIcon />} label="Request slot" onClick={() => {}} />
+              <AssistChip icon={<SendIcon />} label="Send SMS" onClick={() => {}} />
+            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+              <Typography variant="labelLarge" sx={{ minWidth: 120, color: 'text.secondary' }}>Filter</Typography>
+              <FilterDemo />
+            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+              <Typography variant="labelLarge" sx={{ minWidth: 120, color: 'text.secondary' }}>Input</Typography>
+              <InputChip
+                label="Dr. Smith"
+                avatar={<Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>DS</Avatar>}
+                onDelete={() => {}}
+              />
+              <InputChip label="Cardiology" onDelete={() => {}} />
+              <InputChip label="2026-04-22" onDelete={() => {}} />
+            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+              <Typography variant="labelLarge" sx={{ minWidth: 120, color: 'text.secondary' }}>Suggestion</Typography>
+              <SuggestionChip label="Book next available" onClick={() => {}} />
+              <SuggestionChip label="Send to pulmonology" onClick={() => {}} />
+              <SuggestionChip label="Order CBC" onClick={() => {}} />
+            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+              <Typography variant="labelLarge" sx={{ minWidth: 120, color: 'text.secondary' }}>Priority</Typography>
+              <PriorityChip level="emergency" label="Emergency" />
+              <PriorityChip level="urgent" label="Urgent" />
+              <PriorityChip level="semiUrgent" label="Semi-urgent" />
+              <PriorityChip level="nonUrgent" label="Routine" />
+            </Stack>
+          </Stack>
+        </Section>
+
+        <Section title="Buttons — tonal &amp; elevated (new variants)">
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+            <Button variant="contained" startIcon={<SendIcon />}>Filled primary</Button>
+            <Button variant="tonal" startIcon={<EventIcon />}>Filled tonal</Button>
+            <Button variant="elevated">Elevated</Button>
+            <Button variant="outlined">Outlined</Button>
+            <Button variant="text">Text</Button>
           </Stack>
         </Section>
 
