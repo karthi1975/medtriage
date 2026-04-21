@@ -126,6 +126,10 @@ const m3Theme = createTheme({
           textTransform: 'none',
           fontWeight: 500,
           letterSpacing: '0.1px',
+          '&:focus-visible': {
+            outline: `2px solid ${m3Light.primary}`,
+            outlineOffset: 2,
+          },
         },
         contained: {
           boxShadow: 'none',
@@ -221,7 +225,13 @@ const m3Theme = createTheme({
 
     MuiChip: {
       styleOverrides: {
-        root: { borderRadius: shapeCorner.small },
+        root: {
+          borderRadius: shapeCorner.small,
+          '&:focus-visible': {
+            outline: `2px solid ${m3Light.primary}`,
+            outlineOffset: 2,
+          },
+        },
         filled: { backgroundColor: m3Light.surfaceContainerHigh },
       },
     },

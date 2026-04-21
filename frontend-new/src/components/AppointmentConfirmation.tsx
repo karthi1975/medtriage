@@ -122,10 +122,11 @@ export const AppointmentConfirmation: React.FC<AppointmentConfirmationProps> = (
               >
                 <ConfirmationIcon color="success" />
                 <Typography
-                  variant="h4"
+                  variant="displaySmall"
                   fontWeight={700}
-                  fontFamily="monospace"
+                  fontFamily="'Roboto Mono', monospace"
                   color="success.dark"
+                  sx={{ letterSpacing: '0.04em' }}
                 >
                   {confirmationNumber}
                 </Typography>

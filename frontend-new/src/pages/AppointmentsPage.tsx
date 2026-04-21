@@ -35,8 +35,11 @@ import {
   LocationOn as LocationIcon,
   AccessTime as TimeIcon,
   EventNote as EventNoteIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
+import { Fab, useTheme } from '@mui/material';
 import { apiService } from '../services/api';
+import { useThemeMode } from '../theme/ThemeModeProvider';
 import type { Appointment, AppointmentFilters, AppointmentStats } from '../types/appointment';
 import { AppointmentDetailModal } from '../components/appointments/AppointmentDetailModal';
 
@@ -59,6 +62,9 @@ const URGENCY_CONFIG = {
 } as const;
 
 export const AppointmentsPage: React.FC = () => {
+  const { mode } = useThemeMode();
+  const theme = useTheme();
+  const isM3 = mode === 'm3';
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [stats, setStats] = useState<AppointmentStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -180,7 +186,7 @@ export const AppointmentsPage: React.FC = () => {
         <CardContent>
           <Grid container spacing={2}>
             {/* Left: Date/Time */}
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Stack spacing={0.5}>
                 <Chip
                   icon={<TodayIcon />}
@@ -204,7 +210,7 @@ export const AppointmentsPage: React.FC = () => {
             </Grid>
 
             {/* Middle: Patient & Provider Info */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Stack spacing={1}>
                 <Box>
                   <Typography variant="caption" color="text.secondary" textTransform="uppercase">
@@ -262,7 +268,7 @@ export const AppointmentsPage: React.FC = () => {
             </Grid>
 
             {/* Right: Status & Specialty */}
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Stack spacing={1} alignItems="flex-end">
                 <Chip
                   label={statusConfig.label}
@@ -293,14 +299,22 @@ export const AppointmentsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Box sx={{ bgcolor: isM3 ? theme.palette.m3?.surfaceContainerLow : 'background.default', minHeight: '100vh' }}>
+      <Container maxWidth="xl" sx={{ py: 4, position: 'relative' }}>
       {/* Header */}
       <Box mb={4}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4" fontWeight={700}>
-            <CalendarIcon sx={{ fontSize: 32, verticalAlign: 'middle', mr: 1 }} />
-            Appointments
-          </Typography>
+          <Box>
+            <Typography variant={isM3 ? 'headlineSmall' : 'h4'} fontWeight={isM3 ? 400 : 700}>
+              <CalendarIcon sx={{ fontSize: 32, verticalAlign: 'middle', mr: 1, color: 'primary.main' }} />
+              Appointments
+            </Typography>
+            {isM3 && (
+              <Typography variant="bodyMedium" color="text.secondary" sx={{ ml: 5 }}>
+                Today's schedule and upcoming visits
+              </Typography>
+            )}
+          </Box>
           <Stack direction="row" spacing={2}>
             <Tooltip title="Refresh">
               <IconButton onClick={fetchAppointments} color="primary">
@@ -308,7 +322,7 @@ export const AppointmentsPage: React.FC = () => {
               </IconButton>
             </Tooltip>
             <Button
-              variant={showFilters ? 'contained' : 'outlined'}
+              variant={showFilters ? (isM3 ? 'tonal' : 'contained') : 'outlined'}
               startIcon={<FilterIcon />}
               onClick={() => setShowFilters(!showFilters)}
             >
@@ -320,7 +334,7 @@ export const AppointmentsPage: React.FC = () => {
         {/* Stats Cards */}
         {stats && (
           <Grid container spacing={2} mb={3}>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="h4" color="primary.main" fontWeight={700}>
                   {stats.total}
@@ -330,7 +344,7 @@ export const AppointmentsPage: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" fontWeight={700}>
                   {stats.by_status.completed || 0}
@@ -340,7 +354,7 @@ export const AppointmentsPage: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="h4" color="warning.main" fontWeight={700}>
                   {stats.by_urgency.urgent + stats.by_urgency.emergency || 0}
@@ -350,7 +364,7 @@ export const AppointmentsPage: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid size={{ xs: 6, sm: 3 }}>
               <Paper sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="h4" color="info.main" fontWeight={700}>
                   {stats.by_status.scheduled + stats.by_status.confirmed || 0}
@@ -368,7 +382,7 @@ export const AppointmentsPage: React.FC = () => {
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" mb={2}>Filter Appointments</Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -386,7 +400,7 @@ export const AppointmentsPage: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Urgency</InputLabel>
                   <Select
@@ -402,7 +416,7 @@ export const AppointmentsPage: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Date Range</InputLabel>
                   <Select
@@ -456,6 +470,27 @@ export const AppointmentsPage: React.FC = () => {
           onClose={() => setSelectedAppointment(null)}
         />
       )}
-    </Container>
+      </Container>
+
+      {isM3 && (
+        <Fab
+          color="primary"
+          variant="extended"
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            textTransform: 'none',
+            paddingX: 3,
+            boxShadow: '0 4px 12px rgba(26,115,232,0.35)',
+          }}
+          onClick={fetchAppointments}
+          aria-label="New appointment"
+        >
+          <AddIcon sx={{ mr: 1 }} />
+          New appointment
+        </Fab>
+      )}
+    </Box>
   );
 };

@@ -39,8 +39,14 @@ const ThemeModeContext = createContext<ThemeModeContextValue>({
 
 export const useThemeMode = () => useContext(ThemeModeContext);
 
+/**
+ * Phase 4 migration complete: M3 is now the default.
+ * Legacy theme remains reachable via `?theme=legacy` as a rollback path.
+ */
+const DEFAULT_MODE: ThemeMode = 'm3';
+
 function readInitialMode(): ThemeMode {
-  if (typeof window === 'undefined') return 'legacy';
+  if (typeof window === 'undefined') return DEFAULT_MODE;
   try {
     const url = new URL(window.location.href);
     const fromUrl = url.searchParams.get('theme');
@@ -53,7 +59,7 @@ function readInitialMode(): ThemeMode {
   } catch {
     // ignore — storage may be unavailable in privacy modes
   }
-  return 'legacy';
+  return DEFAULT_MODE;
 }
 
 export const ThemeModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

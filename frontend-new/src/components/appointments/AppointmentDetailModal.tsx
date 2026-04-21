@@ -201,7 +201,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
       <DialogContent dividers>
         <Grid container spacing={3}>
           {/* Appointment Information */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Paper sx={{ p: 3, bgcolor: 'primary.lighter' }}>
               <Stack spacing={2}>
                 <Typography variant="h6" fontWeight={600} color="primary.dark">
@@ -209,7 +209,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                   Appointment Schedule
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Date
                     </Typography>
@@ -217,7 +217,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                       {date}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Time
                     </Typography>
@@ -232,7 +232,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
           </Grid>
 
           {/* Patient Information */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" fontWeight={600} mb={2} color="primary.dark">
                 <PersonIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
@@ -339,7 +339,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
           </Grid>
 
           {/* Provider & Facility Information */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={3}>
               {/* Provider */}
               <Paper sx={{ p: 3 }}>
@@ -391,20 +391,20 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
           </Grid>
 
           {/* Appointment Details */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" fontWeight={600} mb={2} color="primary.dark">
                 Visit Details
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="body2" color="text.secondary">
                     Reason for Visit
                   </Typography>
                   <Typography variant="body1">{appointment.reason_for_visit}</Typography>
                 </Grid>
                 {appointment.chief_complaint && (
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Chief Complaint
                     </Typography>
@@ -412,7 +412,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                   </Grid>
                 )}
                 {appointment.visit_type && (
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Visit Type
                     </Typography>
@@ -422,7 +422,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                   </Grid>
                 )}
                 {appointment.triage_priority && (
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Triage Priority
                     </Typography>
@@ -438,12 +438,12 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
               <Divider sx={{ my: 2 }} />
 
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">
                     Created By: {appointment.created_by || 'System'}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">
                     Patient Notified:{' '}
                     {appointment.patient_notified ? (

@@ -113,6 +113,11 @@ export const ChatMessagesM3: React.FC = () => {
                   py: 1.25,
                   boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
                   minWidth: 0,
+                  animation: `sx-msg-in ${theme.motion.duration.medium2}ms ${theme.motion.easing.emphasizedDecel}`,
+                  '@keyframes sx-msg-in': {
+                    from: { opacity: 0, transform: `translateY(4px)` },
+                    to: { opacity: 1, transform: 'translateY(0)' },
+                  },
                 }}
               >
                 <Typography variant="bodyMedium" sx={{ whiteSpace: 'pre-wrap' }}>

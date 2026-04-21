@@ -8,6 +8,7 @@ import {
   Stack,
   Chip,
   Divider,
+  useTheme,
 } from '@mui/material';
 import {
   CalendarMonth as CalendarIcon,
@@ -15,6 +16,7 @@ import {
   Place as PlaceIcon,
   Person as PersonIcon,
   Star as StarIcon,
+  Lightbulb as LightbulbIcon,
 } from '@mui/icons-material';
 
 interface Provider {
@@ -52,6 +54,11 @@ interface SlotRecommendationsProps {
 }
 
 export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots, onBookSlot }) => {
+  const theme = useTheme();
+  const reasoningBg = theme.palette.m3?.surfaceContainerLowest ?? theme.palette.action.hover;
+  const tipBg = theme.palette.m3?.primaryContainer ?? theme.palette.info.lighter;
+  const tipFg = theme.palette.m3?.onPrimaryContainer ?? theme.palette.info.dark;
+
   const formatDateTime = (datetimeStr: string) => {
     const date = new Date(datetimeStr);
     const dateStr = date.toLocaleDateString('en-US', {
@@ -178,13 +185,13 @@ export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots,
                   {slot.reasoning && (
                     <Box
                       p={1.5}
-                      bgcolor="action.hover"
+                      bgcolor={reasoningBg}
                       borderRadius={1}
                       borderLeft={3}
                       borderColor={index === 0 ? 'primary.main' : 'divider'}
                     >
                       <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                        Why recommended:
+                        Why recommended
                       </Typography>
                       <Typography variant="caption" display="block" mt={0.5}>
                         {slot.reasoning}
@@ -212,10 +219,17 @@ export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots,
         })}
       </Stack>
 
-      <Box mt={2} p={1.5} bgcolor="info.lighter" borderRadius={1}>
-        <Typography variant="caption" color="info.dark">
-          💡 Tip: You can also request specific dates or times, e.g., "Find morning slots" or "Show next
-          week"
+      <Box
+        mt={2}
+        p={1.5}
+        bgcolor={tipBg}
+        color={tipFg}
+        borderRadius={`${theme.corner.small}px`}
+        sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}
+      >
+        <LightbulbIcon fontSize="small" sx={{ mt: 0.25, flexShrink: 0 }} />
+        <Typography variant="caption">
+          Tip: You can request specific dates or times — e.g., "Find morning slots" or "Show next week"
         </Typography>
       </Box>
     </Box>
