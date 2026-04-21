@@ -137,12 +137,14 @@ export const ChatView: React.FC = () => {
           leading={
             <Box
               component="img"
-              src="/synaptix-mark.svg"
+              src="/SynaptixSchedule_Logo.png"
               alt=""
               sx={{
-                width: 32,
-                height: 32,
+                width: 40,
+                height: 40,
                 borderRadius: 1,
+                objectFit: 'cover',
+                objectPosition: 'center 30%',
                 boxShadow: '0 2px 6px -1px rgba(26,115,232,0.35)',
               }}
             />
@@ -219,12 +221,14 @@ export const ChatView: React.FC = () => {
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1.25 }}>
             <Box
               component="img"
-              src="/synaptix-mark.svg"
+              src="/SynaptixSchedule_Logo.png"
               alt=""
               sx={{
-                width: 32,
-                height: 32,
+                width: 40,
+                height: 40,
                 borderRadius: 1,
+                objectFit: 'cover',
+                objectPosition: 'center 30%',
                 boxShadow: '0 2px 6px -1px rgba(26,115,232,0.35)',
               }}
             />

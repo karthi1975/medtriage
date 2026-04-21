@@ -538,9 +538,15 @@ export const DesignSystemPreview: React.FC = () => {
               leading={
                 <Box
                   component="img"
-                  src="/synaptix-mark.svg"
+                  src="/SynaptixSchedule_Logo.png"
                   alt=""
-                  sx={{ width: 32, height: 32, borderRadius: 1 }}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 1,
+                    objectFit: 'cover',
+                    objectPosition: 'center 30%',
+                  }}
                 />
               }
               title={
