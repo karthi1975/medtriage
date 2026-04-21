@@ -165,7 +165,7 @@ export const DesignSystemPreview: React.FC = () => {
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Typography variant="headlineSmall" gutterBottom>
-          SynaptixScheduling design tokens
+          SynaptixSchedule design tokens
         </Typography>
         <Typography variant="bodyMedium" color="text.secondary" sx={{ mb: 4 }}>
           Visual reference for every color role, type step, shape, elevation, and motion token in
@@ -546,7 +546,7 @@ export const DesignSystemPreview: React.FC = () => {
               title={
                 <Typography variant="titleLarge" sx={{ letterSpacing: 0.5 }}>
                   <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
-                  <Box component="span" sx={{ fontWeight: 400 }}>Scheduling</Box>
+                  <Box component="span" sx={{ fontWeight: 400 }}>Schedule</Box>
                 </Typography>
               }
               trailing={

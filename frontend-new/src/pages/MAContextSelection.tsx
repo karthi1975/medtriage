@@ -133,9 +133,9 @@ export const MAContextSelection: React.FC = () => {
               <Stack alignItems="center" spacing={0.5} sx={{ mb: 4 }}>
                 <Box
                   component="img"
-                  src="/synaptix-wordmark.svg"
-                  alt="SynaptixScheduling"
-                  sx={{ height: 52, width: 'auto', mb: 1 }}
+                  src="/SynaptixSchedule_Logo.png"
+                  alt="SynaptixSchedule"
+                  sx={{ height: 180, width: 'auto', mb: 2, borderRadius: 2 }}
                 />
                 <Typography variant="headlineSmall" align="center">
                   Start your shift
@@ -263,9 +263,9 @@ export const MAContextSelection: React.FC = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Box
               component="img"
-              src="/synaptix-wordmark.svg"
-              alt="SynaptixScheduling"
-              sx={{ height: 56, width: 'auto' }}
+              src="/SynaptixSchedule_Logo.png"
+              alt="SynaptixSchedule"
+              sx={{ height: 160, width: 'auto', borderRadius: 2 }}
             />
           </Box>
           <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>

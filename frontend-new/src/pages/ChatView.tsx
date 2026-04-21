@@ -150,7 +150,7 @@ export const ChatView: React.FC = () => {
           title={
             <Typography variant="titleLarge" component="div" sx={{ letterSpacing: 0.5, lineHeight: 1 }}>
               <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
-              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Scheduling</Box>
+              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Schedule</Box>
             </Typography>
           }
           trailing={
@@ -230,7 +230,7 @@ export const ChatView: React.FC = () => {
             />
             <Typography variant="h6" component="div" sx={{ letterSpacing: 0.5, lineHeight: 1 }}>
               <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
-              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Scheduling</Box>
+              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Schedule</Box>
             </Typography>
           </Box>
 

@@ -56,7 +56,7 @@ export const ChatMessagesM3: React.FC = () => {
       >
         <SmartToyIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
         <Typography variant="titleLarge" color="text.secondary" gutterBottom>
-          Welcome to SynaptixScheduling
+          Welcome to SynaptixSchedule
         </Typography>
         <Typography variant="bodyMedium" color="text.secondary" textAlign="center" maxWidth={420}>
           Start by entering a patient ID or describing symptoms. I'll help with
