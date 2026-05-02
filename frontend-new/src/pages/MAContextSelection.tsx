@@ -133,11 +133,30 @@ export const MAContextSelection: React.FC = () => {
               <Stack alignItems="center" spacing={0.5} sx={{ mb: 4 }}>
                 <Box
                   component="img"
-                  src="/SynaptixSchedule_Logo.png"
+                  src="/brand/synaptix-logo-square.png"
                   alt="SynaptixSchedule"
-                  sx={{ height: 180, width: 'auto', mb: 2, borderRadius: 2 }}
+                  sx={{
+                    height: 180,
+                    width: 180,
+                    mb: 2,
+                    borderRadius: 3,
+                    objectFit: 'cover',
+                    boxShadow: '0 8px 24px -10px rgba(11,19,64,0.45)',
+                  }}
                 />
-                <Typography variant="headlineSmall" align="center">
+                <Typography
+                  align="center"
+                  sx={{
+                    fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+                    fontWeight: 800,
+                    fontSize: 22,
+                    letterSpacing: '-0.02em',
+                    color: theme.palette.brand?.navy ?? '#0B1340',
+                  }}
+                >
+                  SynaptixSchedule
+                </Typography>
+                <Typography variant="headlineSmall" align="center" sx={{ mt: 1 }}>
                   Start your shift
                 </Typography>
                 <Typography variant="bodyMedium" align="center" color="text.secondary">

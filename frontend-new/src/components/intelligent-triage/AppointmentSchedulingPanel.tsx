@@ -79,7 +79,8 @@ export const AppointmentSchedulingPanel: React.FC<AppointmentSchedulingPanelProp
       console.log('🔍 Searching for slots:', requestBody);
 
       // Call scheduling recommendation API
-      const response = await fetch('http://localhost:8002/api/v1/scheduling/recommend', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8002';
+      const response = await fetch(`${apiUrl}/api/v1/scheduling/recommend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -128,7 +129,8 @@ export const AppointmentSchedulingPanel: React.FC<AppointmentSchedulingPanelProp
       console.log('📅 Booking appointment with request:', JSON.stringify(requestBody, null, 2));
 
       // Call appointment booking API
-      const response = await fetch('http://localhost:8002/api/v1/scheduling/book', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8002';
+      const response = await fetch(`${apiUrl}/api/v1/scheduling/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -270,7 +272,11 @@ export const AppointmentSchedulingPanel: React.FC<AppointmentSchedulingPanelProp
         {/* Slot Recommendations */}
         {showSlots && availableSlots.length > 0 && (
           <Box>
-            <SlotRecommendations slots={availableSlots} onBookSlot={handleBookSlot} />
+            <SlotRecommendations
+              slots={availableSlots}
+              onBookSlot={handleBookSlot}
+              urgency={triageResult.urgency}
+            />
             <Button
               variant="outlined"
               fullWidth

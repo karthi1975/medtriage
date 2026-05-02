@@ -162,6 +162,27 @@ export const m3Dark: M3ColorRoles = {
   inversePrimary: BRAND_PRIMARY,
 };
 
+/**
+ * Brand identity layer (logo gradient + navy).
+ * Distinct from the in-product clinical palette; used for AppBar marks,
+ * splash, login lockup, and any identity-forward chrome.
+ */
+export const brand = {
+  navy: '#0B1340',
+  navyDeep: '#060B2A',
+  cyan: '#4FC9E8',
+  teal: '#2EE2C8',
+  mint: '#1FE9A8',
+  gradient: 'linear-gradient(180deg, #4FC9E8 0%, #2EE2C8 55%, #1FE9A8 100%)',
+  gradientDiag: 'linear-gradient(135deg, #4FC9E8 0%, #1FE9A8 100%)',
+} as const;
+
+/** Brand + product font families. */
+export const fontFamilyBrand =
+  '"Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif';
+export const fontFamilyMono =
+  '"Roboto Mono", "SF Mono", Menlo, Consolas, monospace';
+
 /** Clinical priority ladder — kept separate from M3 roles by design. */
 export const priority = {
   emergency: '#DC3545',
@@ -246,6 +267,7 @@ export const elevationTint = {
   level5: 0.14,
 } as const;
 
+export type BrandRoles = typeof brand;
 export type PriorityRoles = typeof priority;
 export type ChatBubbleRoles = typeof chatBubble;
 export type ShapeScale = typeof shapeCorner;

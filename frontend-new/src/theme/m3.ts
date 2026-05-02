@@ -16,6 +16,7 @@ import {
   motion,
   elevationTint,
   m3Typography,
+  brand,
 } from './tokens';
 
 const m3Theme = createTheme({
@@ -76,6 +77,7 @@ const m3Theme = createTheme({
     m3: m3Light,
     priority,
     chat: chatBubble,
+    brand,
   },
 
   typography: {

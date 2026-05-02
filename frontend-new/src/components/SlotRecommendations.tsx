@@ -48,16 +48,39 @@ interface Slot {
   distance_miles?: number;
 }
 
+type UrgencyLevel = 'emergency' | 'urgent' | 'semi-urgent' | 'non-urgent';
+
 interface SlotRecommendationsProps {
   slots: Slot[];
   onBookSlot: (slot: Slot) => void;
+  /** Optional clinical urgency from the active triage — drives priority left-border color. */
+  urgency?: UrgencyLevel | string;
 }
 
-export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots, onBookSlot }) => {
+export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots, onBookSlot, urgency }) => {
   const theme = useTheme();
   const reasoningBg = theme.palette.m3?.surfaceContainerLowest ?? theme.palette.action.hover;
   const tipBg = theme.palette.m3?.primaryContainer ?? theme.palette.info.lighter;
   const tipFg = theme.palette.m3?.onPrimaryContainer ?? theme.palette.info.dark;
+
+  // Map urgency to clinical priority ladder color. Falls back to divider when unset.
+  const priorityColor = (() => {
+    const p = theme.palette.priority;
+    if (!p) return undefined;
+    const u = (urgency || '').toString().toLowerCase().replace('_', '-');
+    if (u === 'emergency' || u === 'critical') return p.emergency;
+    if (u === 'urgent' || u === 'high') return p.urgent;
+    if (u === 'semi-urgent' || u === 'medium' || u === 'moderate') return p.semiUrgent;
+    if (u === 'non-urgent' || u === 'routine' || u === 'low') return p.nonUrgent;
+    return undefined;
+  })();
+
+  // Match-score → color, per design system v2 ladder.
+  const matchColor = (pct: number) => {
+    if (pct >= 90) return theme.palette.primary.main;
+    if (pct >= 80) return theme.palette.success.main;
+    return theme.palette.priority?.urgent ?? theme.palette.warning.main;
+  };
 
   const formatDateTime = (datetimeStr: string) => {
     const date = new Date(datetimeStr);
@@ -111,17 +134,23 @@ export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots,
         {slots.map((slot, index) => {
           const { dateStr, timeStr } = formatDateTime(slot.slot_datetime);
           const matchPercent = Math.round(slot.match_score * 100);
+          const mc = matchColor(matchPercent);
+          const leftBorderColor = priorityColor ?? (index === 0 ? mc : theme.palette.divider);
 
           return (
             <Card
               key={`${slot.provider.provider_id}-${slot.slot_datetime}`}
               variant="outlined"
               sx={{
-                borderColor: index === 0 ? 'primary.main' : 'divider',
-                borderWidth: index === 0 ? 2 : 1,
+                position: 'relative',
+                borderColor: index === 0 ? mc : 'divider',
+                borderWidth: 1,
+                borderLeft: '4px solid',
+                borderLeftColor: leftBorderColor,
                 '&:hover': {
-                  borderColor: 'primary.main',
-                  boxShadow: 2,
+                  borderColor: mc,
+                  boxShadow: 4,
+                  transform: 'translateY(-2px)',
                 },
                 transition: 'all 0.2s',
               }}
@@ -129,17 +158,35 @@ export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots,
               <CardContent>
                 <Stack spacing={2}>
                   {/* Header with Rank and Match Score */}
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <span>{getRankEmoji(index)}</span>
-                      {slot.provider.name}
+                  <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span aria-hidden>{getRankEmoji(index)}</span>
+                      <Box component="span" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {slot.provider.name}
+                      </Box>
                     </Typography>
                     <Chip
                       icon={<StarIcon />}
                       label={`${matchPercent}% Match`}
                       size="small"
-                      color={index === 0 ? 'primary' : 'default'}
-                      sx={{ fontWeight: 600 }}
+                      sx={{
+                        fontWeight: 600,
+                        bgcolor: `${mc}1A`,
+                        color: mc,
+                        flexShrink: 0,
+                        '& .MuiChip-icon': { color: mc },
+                      }}
                     />
                   </Box>
 
@@ -164,8 +211,18 @@ export const SlotRecommendations: React.FC<SlotRecommendationsProps> = ({ slots,
 
                     <Box display="flex" alignItems="center" gap={1}>
                       <TimeIcon fontSize="small" color="action" />
-                      <Typography variant="body2">
-                        {timeStr} ({slot.duration_minutes} min)
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: '"Roboto Mono", monospace',
+                          fontVariantNumeric: 'tabular-nums',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {timeStr}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        ({slot.duration_minutes} min)
                       </Typography>
                     </Box>
 

@@ -36,11 +36,16 @@ import { AppointmentSchedulingPanel } from '../components/intelligent-triage/App
 import intelligentTriageApi from '../services/intelligentTriageApi';
 import { useThemeMode } from '../theme/ThemeModeProvider';
 import { TopAppBarSmall, SideSheet } from '../components/md3';
+import { TodayAppointmentsPane } from '../components/panels/TodayAppointmentsPane';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 export const ChatView: React.FC = () => {
   const navigate = useNavigate();
   const { mode } = useThemeMode();
   const theme = useTheme();
+  // Below 1280: collapse the right rail to a drawer (per v2 layout spec).
+  // Hook must be at top level — never call hooks inside the m3 branch.
+  const isCompact = useMediaQuery('(max-width:1279px)');
   const [rightSheetOpen, setRightSheetOpen] = useState(true);
   const { session, logout } = useMASession();
   const { currentPatient, clearChat, messages } = useChat();
@@ -130,29 +135,47 @@ export const ChatView: React.FC = () => {
 
   if (mode === 'm3') {
     const canvasBg = theme.palette.m3?.surfaceContainerLow ?? theme.palette.background.default;
+    const navy = theme.palette.brand?.navy ?? '#0B1340';
+    const railOpen = isCompact ? rightSheetOpen : true;
     return (
       <Box display="flex" flexDirection="column" height="100vh" sx={{ bgcolor: canvasBg }}>
         <Box sx={{ position: 'relative' }}>
           <TopAppBarSmall
           leading={
             <Box
-              component="img"
-              src="/SynaptixSchedule_Logo.png"
-              alt=""
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 1,
-                objectFit: 'cover',
-                objectPosition: 'center 30%',
-                boxShadow: '0 2px 6px -1px rgba(26,115,232,0.35)',
+                width: 36,
+                height: 36,
+                borderRadius: '9px',
+                bgcolor: navy,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px -2px rgba(11,19,64,0.5)',
+                flexShrink: 0,
               }}
-            />
+            >
+              <Box
+                component="img"
+                src="/brand/synaptix-mark-only.png"
+                alt=""
+                sx={{ height: 26, width: 'auto', display: 'block' }}
+              />
+            </Box>
           }
           title={
-            <Typography variant="titleLarge" component="div" sx={{ letterSpacing: 0.5, lineHeight: 1 }}>
-              <Box component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>Synaptix</Box>
-              <Box component="span" sx={{ fontWeight: 400, color: 'text.primary' }}>Schedule</Box>
+            <Typography
+              component="div"
+              sx={{
+                fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+                fontWeight: 800,
+                fontSize: 20,
+                letterSpacing: '-0.01em',
+                lineHeight: 1,
+                color: navy,
+              }}
+            >
+              SynaptixSchedule
             </Typography>
           }
           trailing={
@@ -163,7 +186,7 @@ export const ChatView: React.FC = () => {
                   {session.facility_name} • {session.specialty_name}
                 </Typography>
               </Box>
-              {!rightSheetOpen && (
+              {isCompact && !rightSheetOpen && (
                 <IconButton
                   onClick={() => setRightSheetOpen(true)}
                   aria-label="Open context panel"
@@ -182,25 +205,41 @@ export const ChatView: React.FC = () => {
             aria-hidden
             sx={{
               height: 2,
-              background: 'linear-gradient(90deg, #1A73E8 0%, #34A853 100%)',
-              opacity: 0.85,
+              background: theme.palette.brand?.gradientDiag ?? 'linear-gradient(90deg, #1A73E8 0%, #34A853 100%)',
+              opacity: 0.9,
             }}
           />
         </Box>
 
         <Box display="flex" flex={1} overflow="hidden">
+          {/* LEFT COLUMN — Today's Appointments stacked above the chat thread */}
           <Box
             flex={1}
             display="flex"
             flexDirection="column"
             minWidth={0}
-            sx={{ bgcolor: canvasBg }}
+            sx={{ bgcolor: canvasBg, gap: 1.25, p: { xs: 1, md: 1.25 } }}
           >
-            <ChatMessagesM3 />
-            <ChatInputM3 />
+            <TodayAppointmentsPane height={340} />
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                overflow: 'hidden',
+              }}
+            >
+              <ChatMessagesM3 />
+              <ChatInputM3 />
+            </Box>
           </Box>
           <SideSheet
-            open={rightSheetOpen}
+            open={railOpen}
             onClose={() => setRightSheetOpen(false)}
             title="Patient context"
             width={420}

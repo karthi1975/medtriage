@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" role="img" aria-label="SynaptixSchedule mark">
+  <defs>
+    <linearGradient id="sxg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4FC9E8"></stop>
+      <stop offset="55%" stop-color="#2EE2C8"></stop>
+      <stop offset="100%" stop-color="#1FE9A8"></stop>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-10%" width="140%" height="120%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"></feGaussianBlur>
+      <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+    </filter>
+  </defs>
+  
+  <g filter="url(#glow)" fill="none" stroke="url(#sxg)" stroke-width="11" stroke-linecap="square" stroke-linejoin="miter">
+    
+    <path d="M 145 14 L 70 14 L 70 90 L 145 90 L 145 150 L 70 150 L 70 226 L 145 226"></path>
+    
+    <path d="M 142 22 L 78 22 L 78 82 L 142 82 L 142 158 L 78 158 L 78 218 L 142 218" stroke-width="3" opacity="0.45" stroke="#fff"></path>
+  </g>
+  
+  <g stroke="url(#sxg)" stroke-width="3" fill="none">
+    <path d="M 145 14 L 165 14 L 165 32"></path>
+  </g>
+  <circle cx="165" cy="38" r="6.5" fill="none" stroke="url(#sxg)" stroke-width="3"></circle>
+  
+  <g stroke="url(#sxg)" stroke-width="3" fill="none">
+    <path d="M 70 226 L 50 226 L 50 208"></path>
+  </g>
+  <circle cx="50" cy="202" r="6.5" fill="none" stroke="url(#sxg)" stroke-width="3"></circle>
+</svg>

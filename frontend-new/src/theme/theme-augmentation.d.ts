@@ -10,6 +10,7 @@ import type {
   ShapeScale,
   MotionTokens,
   ElevationTint,
+  BrandRoles,
 } from './tokens';
 
 declare module '@mui/material/styles' {
@@ -25,12 +26,14 @@ declare module '@mui/material/styles' {
     m3: M3ColorRoles;
     priority: PriorityRoles;
     chat: ChatBubbleRoles;
+    brand: BrandRoles;
   }
 
   interface PaletteOptions {
     m3?: M3ColorRoles;
     priority?: PriorityRoles;
     chat?: ChatBubbleRoles;
+    brand?: BrandRoles;
   }
 
   interface Theme {

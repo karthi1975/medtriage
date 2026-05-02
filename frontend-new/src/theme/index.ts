@@ -11,6 +11,7 @@ import {
   chatBubble,
   m3Light,
   m3Typography,
+  brand as brandTokens,
 } from './tokens';
 
 // Color palette (Healthcare-optimized Google Material Design)
@@ -81,6 +82,7 @@ const theme = createTheme({
     m3: m3Light,
     priority: priorityTokens,
     chat: chatBubble,
+    brand: brandTokens,
   },
 
   corner: shapeCorner,
