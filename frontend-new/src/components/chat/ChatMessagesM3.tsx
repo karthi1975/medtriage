@@ -20,6 +20,7 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useChat } from '../../context/ChatContext';
 import { useMASession } from '../../context/MASessionContext';
+import { useTodayAppointments } from '../../hooks/useTodayAppointments';
 import { format } from 'date-fns';
 import { AppointmentConfirmation } from '../AppointmentConfirmation';
 import { PriorityChip } from '../md3/Chips';
@@ -50,6 +51,13 @@ const WelcomeHero: React.FC = () => {
   const theme = useTheme();
   const { session } = useMASession();
   const { sendMessage } = useChat();
+  // Subscribed to the same source as the appointments pane — both surfaces
+  // refresh in lockstep, no duplicate request.
+  const {
+    appointments,
+    isLoading: apptsLoading,
+    error: apptsError,
+  } = useTodayAppointments();
   const firstName = (session?.ma_name || '').split(' ')[0] || 'there';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const navy = theme.palette.brand?.navy ?? '#0B1340';
@@ -61,10 +69,45 @@ const WelcomeHero: React.FC = () => {
     { icon: <AutoAwesomeIcon />, label: 'Suggest follow-ups', hint: 'patients due for outreach', prompt: 'Suggest follow-up patients' },
   ];
 
+  // Real numbers from the shared hook. We swap "This week" (would need a
+  // separate stats fetch) for "Urgent" — same source, more actionable for an
+  // MA scanning their shift.
+  const todayCount = appointments.length;
+  const pendingCount = appointments.filter(
+    (a) => a.status === 'scheduled' || a.status === 'confirmed',
+  ).length;
+  const urgentCount = appointments.filter(
+    (a) => a.urgency === 'emergency' || a.urgency === 'urgent',
+  ).length;
+
+  // When data hasn't arrived yet we show a tasteful em-dash; when it errored
+  // we show "—" with the same treatment so nothing screams. The pane handles
+  // surfacing the actual error.
+  const fmt = (n: number) => (apptsLoading || apptsError ? '—' : String(n));
+
   const stats = [
-    { label: 'Today', value: '—', sub: 'appointments', tone: theme.palette.primary.main },
-    { label: 'Pending', value: '—', sub: 'pre-visit tasks', tone: theme.palette.priority?.urgent ?? theme.palette.warning.main },
-    { label: 'This week', value: '—', sub: 'patients seen', tone: theme.palette.success.main },
+    {
+      label: 'Today',
+      value: fmt(todayCount),
+      sub: 'appointments',
+      tone: theme.palette.primary.main,
+    },
+    {
+      label: 'Pending',
+      value: fmt(pendingCount),
+      sub: 'pre-visit tasks',
+      tone: theme.palette.priority?.urgent ?? theme.palette.warning.main,
+    },
+    {
+      label: 'Urgent',
+      value: fmt(urgentCount),
+      sub: 'flagged today',
+      // Only burn the eye with red when there's actually something urgent.
+      tone:
+        !apptsLoading && !apptsError && urgentCount > 0
+          ? theme.palette.priority?.emergency ?? theme.palette.error.main
+          : theme.palette.success.main,
+    },
   ];
 
   return (

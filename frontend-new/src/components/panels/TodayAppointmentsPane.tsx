@@ -1,11 +1,19 @@
 /**
  * Today's Appointments pane — top-left region of the v2 3-region layout.
  *
- * Source of truth: GET /api/v1/appointments/today/list (filtered by facility),
- * polled once on mount. Click a row to open that patient in chat (sends a
- * lookup message via ChatContext.sendMessage). All states handled: loading
- * skeleton, empty, fetch error with retry, long-name truncation, keyboard
- * activation.
+ * Subscribes to `useTodayAppointments` (shared with the welcome hero stats)
+ * so both surfaces show the same numbers and refresh in lockstep.
+ *
+ * Design principles encoded here:
+ *   - A schedule fetch failure is recoverable, so we never red-alert. A
+ *     compact amber strip sits *above* whatever data we have, the body stays
+ *     usable, and "Why?" reveals the backend's actual reason for diagnosis.
+ *   - Emergency / urgent rows float to the top so Sarah sees them first.
+ *   - Click feedback is instant via a local `selectedId` — the chat round
+ *     trip can take seconds, but the row reads as "selected" the moment she
+ *     clicks.
+ *   - "Updated 12s ago" gives Sarah confidence the data is fresh, even when
+ *     no new appointments have arrived.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -13,15 +21,20 @@ import {
   Stack,
   Typography,
   Skeleton,
-  Alert,
   Button,
   ButtonBase,
+  IconButton,
+  Collapse,
   useTheme,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { apiService } from '../../services/api';
-import { useMASession } from '../../context/MASessionContext';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import { useChat } from '../../context/ChatContext';
+import {
+  useTodayAppointments,
+  formatLastUpdated,
+} from '../../hooks/useTodayAppointments';
 import type { Appointment } from '../../types/appointment';
 
 type Urgency = Appointment['urgency'];
@@ -31,6 +44,14 @@ const URGENCY_LABEL: Record<Urgency, string> = {
   urgent: 'URGENT',
   'semi-urgent': 'SEMI',
   'non-urgent': 'ROUTINE',
+};
+
+// Lower number = floats higher in the sort.
+const URGENCY_RANK: Record<Urgency, number> = {
+  emergency: 0,
+  urgent: 1,
+  'semi-urgent': 2,
+  'non-urgent': 3,
 };
 
 function formatTime(datetimeStr: string): { hhmm: string; ampm: string } {
@@ -51,10 +72,11 @@ function todayLabel(): string {
 
 interface RowProps {
   appt: Appointment;
+  selected: boolean;
   onSelect: (appt: Appointment) => void;
 }
 
-const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
+const AppointmentRow: React.FC<RowProps> = ({ appt, selected, onSelect }) => {
   const theme = useTheme();
   const { hhmm, ampm } = formatTime(appt.appointment_datetime);
   const p = theme.palette.priority;
@@ -81,18 +103,18 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
       focusRipple
       onClick={() => onSelect(appt)}
       aria-label={`Open patient ${appt.patient_fhir_id} at ${hhmm} ${ampm}`}
+      aria-current={selected ? 'true' : undefined}
       sx={{
         width: '100%',
         display: 'grid',
         gridTemplateColumns: '54px 1fr 110px 76px',
         alignItems: 'center',
         columnGap: 1.25,
-        rowGap: 0,
         px: 1.25,
         py: 1,
-        bgcolor: 'background.paper',
+        bgcolor: selected ? 'rgba(26,115,232,0.06)' : 'background.paper',
         border: '1px solid',
-        borderColor: 'divider',
+        borderColor: selected ? 'primary.main' : 'divider',
         borderLeft: '4px solid',
         borderLeftColor: borderColor || 'divider',
         borderRadius: 1,
@@ -109,7 +131,6 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
         },
       }}
     >
-      {/* Time block */}
       <Box>
         <Typography
           sx={{
@@ -123,14 +144,11 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
         >
           {hhmm}
         </Typography>
-        <Typography
-          sx={{ fontSize: 10, fontWeight: 400, color: 'text.secondary', lineHeight: 1.1 }}
-        >
+        <Typography sx={{ fontSize: 10, fontWeight: 400, color: 'text.secondary', lineHeight: 1.1 }}>
           {ampm}
         </Typography>
       </Box>
 
-      {/* Patient + reason */}
       <Box sx={{ minWidth: 0 }}>
         <Typography
           sx={{
@@ -157,7 +175,6 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
         </Typography>
       </Box>
 
-      {/* Provider */}
       <Typography
         sx={{
           fontSize: 11,
@@ -170,7 +187,6 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
         {appt.provider.name}
       </Typography>
 
-      {/* Urgency pill */}
       <Box
         sx={{
           justifySelf: 'end',
@@ -191,6 +207,91 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, onSelect }) => {
   );
 };
 
+interface SoftErrorStripProps {
+  message: string;
+  detail?: string;
+  onRetry: () => void;
+  isRetrying: boolean;
+  isStale: boolean;
+}
+
+const SoftErrorStrip: React.FC<SoftErrorStripProps> = ({
+  message,
+  detail,
+  onRetry,
+  isRetrying,
+  isStale,
+}) => {
+  const [showDetail, setShowDetail] = useState(false);
+  return (
+    <Box
+      role="status"
+      aria-live="polite"
+      sx={{
+        bgcolor: 'rgba(253,126,20,0.08)',
+        border: '1px solid rgba(253,126,20,0.25)',
+        borderRadius: 1.5,
+        px: 1.25,
+        py: 0.75,
+        mb: 1,
+        fontSize: 12,
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <WarningAmberRoundedIcon sx={{ fontSize: 16, color: 'priority.urgent' }} />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ fontSize: 12, fontWeight: 500, color: 'text.primary' }} noWrap>
+            {isStale ? 'Schedule may be stale' : message}
+          </Typography>
+          <Typography sx={{ fontSize: 10.5, color: 'text.secondary' }} noWrap>
+            {isStale
+              ? "We'll keep retrying in the background."
+              : "We'll auto-retry; tap if you can't wait."}
+          </Typography>
+        </Box>
+        {detail && (
+          <IconButton
+            size="small"
+            onClick={() => setShowDetail((v) => !v)}
+            aria-label={showDetail ? 'Hide details' : 'Show why'}
+            sx={{ p: 0.25 }}
+          >
+            <ExpandMoreRoundedIcon
+              fontSize="small"
+              sx={{
+                transition: 'transform .15s',
+                transform: showDetail ? 'rotate(180deg)' : 'none',
+              }}
+            />
+          </IconButton>
+        )}
+        <Button
+          size="small"
+          onClick={onRetry}
+          disabled={isRetrying}
+          sx={{ minWidth: 0, px: 1, fontSize: 11 }}
+        >
+          {isRetrying ? 'Retrying…' : 'Retry'}
+        </Button>
+      </Stack>
+      <Collapse in={showDetail} unmountOnExit>
+        <Typography
+          sx={{
+            mt: 0.75,
+            fontFamily: '"Roboto Mono", monospace',
+            fontSize: 10.5,
+            color: 'text.secondary',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {detail}
+        </Typography>
+      </Collapse>
+    </Box>
+  );
+};
+
 export interface TodayAppointmentsPaneProps {
   /** Pixel height of the pane (default 340 per spec). */
   height?: number | string;
@@ -200,39 +301,46 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
   height = 340,
 }) => {
   const theme = useTheme();
-  const { session } = useMASession();
   const { sendMessage } = useChat();
-  const [appts, setAppts] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    appointments,
+    isLoading,
+    isRefreshing,
+    error,
+    isStale,
+    lastUpdated,
+    refresh,
+  } = useTodayAppointments();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await apiService.getTodaysAppointments(session?.facility_id);
-      // Sort by datetime ascending — earliest first.
-      const sorted = [...data].sort(
-        (a, b) =>
-          new Date(a.appointment_datetime).getTime() -
-          new Date(b.appointment_datetime).getTime(),
-      );
-      setAppts(sorted);
-    } catch (err) {
-      console.error('[TodayAppointments] fetch failed', err);
-      setError("Couldn't load today's schedule.");
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.facility_id]);
+  // Optimistic selection: highlight immediately on click; clear when chat
+  // round-trip is in flight isn't tracked here — the highlight just persists,
+  // which matches "this is the patient we're working on now."
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  // Tick a "now" so "Updated 12s ago" stays fresh without re-rendering rows.
+  const [, setNowTick] = useState(0);
   useEffect(() => {
-    load();
-  }, [load]);
+    const id = setInterval(() => setNowTick((n) => n + 1), 15_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Sort: emergency/urgent float to top, then by time ascending.
+  const sorted = React.useMemo(
+    () =>
+      [...appointments].sort((a, b) => {
+        const r = URGENCY_RANK[a.urgency] - URGENCY_RANK[b.urgency];
+        if (r !== 0) return r;
+        return (
+          new Date(a.appointment_datetime).getTime() -
+          new Date(b.appointment_datetime).getTime()
+        );
+      }),
+    [appointments],
+  );
 
   const handleSelect = useCallback(
     (appt: Appointment) => {
-      // Send a lookup message — chat flow will fetch & set patient context.
+      setSelectedId(appt.appointment_id);
       sendMessage(
         `Pull up patient ${appt.patient_fhir_id} for ${appt.reason_for_visit}`,
       );
@@ -240,9 +348,20 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
     [sendMessage],
   );
 
-  const pendingCount = appts.filter(
+  const pendingCount = sorted.filter(
     (a) => a.status === 'scheduled' || a.status === 'confirmed',
   ).length;
+
+  const subline =
+    isLoading && appointments.length === 0
+      ? 'Loading…'
+      : appointments.length === 0
+      ? 'No appointments'
+      : `${appointments.length} appointment${appointments.length === 1 ? '' : 's'}${
+          pendingCount > 0 ? ` · ${pendingCount} pending` : ''
+        }`;
+
+  const updatedLabel = lastUpdated ? formatLastUpdated(lastUpdated) : '';
 
   return (
     <Box
@@ -274,52 +393,57 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
           flexShrink: 0,
         }}
       >
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1.1 }}>
             Today · {todayLabel()}
           </Typography>
-          <Typography sx={{ fontSize: 11, color: 'text.secondary', mt: 0.25 }}>
-            {loading
-              ? 'Loading…'
-              : appts.length === 0
-              ? 'No appointments'
-              : `${appts.length} appointment${appts.length === 1 ? '' : 's'}${
-                  pendingCount > 0 ? ` · ${pendingCount} pending` : ''
-                }`}
+          <Typography sx={{ fontSize: 11, color: 'text.secondary', mt: 0.25 }} noWrap>
+            {subline}
+            {updatedLabel && !isLoading ? ` · ${updatedLabel}` : ''}
           </Typography>
         </Box>
         <Button
           size="small"
-          onClick={load}
-          startIcon={<RefreshIcon fontSize="small" />}
-          disabled={loading}
+          onClick={refresh}
+          startIcon={
+            <RefreshIcon
+              fontSize="small"
+              sx={{
+                animation: isRefreshing ? 'sx-spin 0.9s linear infinite' : 'none',
+                '@keyframes sx-spin': {
+                  from: { transform: 'rotate(0deg)' },
+                  to: { transform: 'rotate(360deg)' },
+                },
+              }}
+            />
+          }
+          disabled={isRefreshing}
           sx={{ minWidth: 0, px: 1, fontSize: 12 }}
         >
-          Refresh
+          {isRefreshing ? 'Refreshing' : 'Refresh'}
         </Button>
       </Box>
 
       {/* Body */}
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1.75, py: 1.25 }}>
-        {loading ? (
+        {/* Soft amber error strip — sits ABOVE data, never replaces it */}
+        {error && (
+          <SoftErrorStrip
+            message={error.message}
+            detail={error.detail}
+            onRetry={refresh}
+            isRetrying={isRefreshing}
+            isStale={isStale}
+          />
+        )}
+
+        {isLoading && appointments.length === 0 ? (
           <Stack spacing={0.75}>
             {[0, 1, 2, 3].map((i) => (
               <Skeleton key={i} variant="rounded" height={52} />
             ))}
           </Stack>
-        ) : error ? (
-          <Alert
-            severity="error"
-            action={
-              <Button color="inherit" size="small" onClick={load}>
-                Retry
-              </Button>
-            }
-            sx={{ fontSize: 12 }}
-          >
-            {error}
-          </Alert>
-        ) : appts.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <Box
             sx={{
               height: '100%',
@@ -333,18 +457,23 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
             }}
           >
             <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
-              No appointments today
+              {error
+                ? "We couldn't load today's schedule yet"
+                : 'No appointments today'}
             </Typography>
-            <Typography sx={{ fontSize: 11, mt: 0.5, maxWidth: 240 }}>
-              Walk-ins and triage from chat will appear here once scheduled.
+            <Typography sx={{ fontSize: 11, mt: 0.5, maxWidth: 260 }}>
+              {error
+                ? "We'll keep trying. You can still pull up patients from chat."
+                : 'Walk-ins and triage from chat will appear here once scheduled.'}
             </Typography>
           </Box>
         ) : (
           <Stack spacing={0.75}>
-            {appts.map((appt) => (
+            {sorted.map((appt) => (
               <AppointmentRow
                 key={appt.appointment_id}
                 appt={appt}
+                selected={selectedId === appt.appointment_id}
                 onSelect={handleSelect}
               />
             ))}

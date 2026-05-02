@@ -127,13 +127,17 @@ class APIService {
   }
 
   async getTodaysAppointments(facilityId?: number, providerId?: number): Promise<Appointment[]> {
-    const response = await this.client.get<Appointment[]>('/api/v1/appointments/today/list', {
-      params: {
-        facility_id: facilityId,
-        provider_id: providerId,
-      },
-    });
-    return response.data;
+    // Backend returns { date, appointments, total }. Defensively handle either
+    // shape (object-with-array OR raw array) so a future contract change
+    // doesn't silently break the UI.
+    const response = await this.client.get<{ appointments?: Appointment[] } | Appointment[]>(
+      '/api/v1/appointments/today/list',
+      { params: { facility_id: facilityId, provider_id: providerId } },
+    );
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.appointments)) return data.appointments;
+    return [];
   }
 
   async getAppointmentStats(
