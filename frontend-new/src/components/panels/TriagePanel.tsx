@@ -41,13 +41,14 @@ function priorityLabel(p: string | undefined): string {
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Typography
     sx={{
-      fontSize: 9.5,
+      fontFamily: '"Roboto Condensed", Arial, sans-serif',
+      fontSize: 10,
       fontWeight: 700,
-      letterSpacing: '0.10em',
+      letterSpacing: '0.08em',
       textTransform: 'uppercase',
       color: 'text.disabled',
-      mt: 1,
-      mb: 0.5,
+      mt: 0.6,
+      mb: 0.25,
     }}
   >
     {children}
@@ -134,7 +135,7 @@ export const TriagePanel: React.FC<TriagePanelProps> = ({ triage, height }) => {
               {redFlags.map((f, i) => (
                 <Stack key={i} direction="row" alignItems="flex-start" spacing={0.75}>
                   <WarningAmberRoundedIcon sx={{ fontSize: 13, color: theme.palette.priority?.emergency ?? 'error.main', mt: 0.15 }} />
-                  <Typography sx={{ fontSize: 11.5, lineHeight: 1.35 }}>{f}</Typography>
+                  <Typography sx={{ fontSize: 11, lineHeight: 1.35 }}>{f}</Typography>
                 </Stack>
               ))}
             </Stack>
@@ -146,7 +147,7 @@ export const TriagePanel: React.FC<TriagePanelProps> = ({ triage, height }) => {
             <SectionLabel>Risk Factors</SectionLabel>
             <Stack spacing={0.25}>
               {riskFactors.map((f, i) => (
-                <Typography key={i} sx={{ fontSize: 11.5, lineHeight: 1.35 }}>
+                <Typography key={i} sx={{ fontSize: 11, lineHeight: 1.35 }}>
                   • {f}
                 </Typography>
               ))}
@@ -161,7 +162,7 @@ export const TriagePanel: React.FC<TriagePanelProps> = ({ triage, height }) => {
               {recsArray.map((r, i) => (
                 <Typography
                   key={i}
-                  sx={{ fontSize: 11.5, lineHeight: 1.35, color: theme.palette.priority?.emergency ?? 'error.main', fontWeight: 500 }}
+                  sx={{ fontSize: 11, lineHeight: 1.35, color: theme.palette.priority?.emergency ?? 'error.main', fontWeight: 500 }}
                 >
                   • {r}
                 </Typography>
@@ -173,23 +174,23 @@ export const TriagePanel: React.FC<TriagePanelProps> = ({ triage, height }) => {
         {recsObj && (
           <>
             <SectionLabel>Recommendations</SectionLabel>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 0.25, columnGap: 1, fontSize: 11.5 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 0.25, columnGap: 1, fontSize: 11 }}>
               {recsObj.immediate_action && (
                 <>
                   <Typography sx={{ fontSize: 10.5, fontWeight: 600, color: 'text.secondary' }}>Immediate</Typography>
-                  <Typography sx={{ fontSize: 11.5 }}>{recsObj.immediate_action}</Typography>
+                  <Typography sx={{ fontSize: 11 }}>{recsObj.immediate_action}</Typography>
                 </>
               )}
               {recsObj.care_level && (
                 <>
                   <Typography sx={{ fontSize: 10.5, fontWeight: 600, color: 'text.secondary' }}>Care level</Typography>
-                  <Typography sx={{ fontSize: 11.5 }}>{recsObj.care_level}</Typography>
+                  <Typography sx={{ fontSize: 11 }}>{recsObj.care_level}</Typography>
                 </>
               )}
               {recsObj.timeframe && (
                 <>
                   <Typography sx={{ fontSize: 10.5, fontWeight: 600, color: 'text.secondary' }}>Timeframe</Typography>
-                  <Typography sx={{ fontSize: 11.5 }}>{recsObj.timeframe}</Typography>
+                  <Typography sx={{ fontSize: 11 }}>{recsObj.timeframe}</Typography>
                 </>
               )}
             </Box>

@@ -116,7 +116,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height 
                 alignItems: 'flex-start',
                 gap: 0.75,
                 px: 0.75,
-                py: 0.6,
+                py: 0.45,
                 borderLeft: '3px solid',
                 borderLeftColor: c,
                 borderTop: '1px solid',
@@ -142,7 +142,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height 
                 <Stack direction="row" alignItems="center" spacing={0.75}>
                   <Typography
                     sx={{
-                      fontSize: 12,
+                      fontSize: 11.5,
                       fontWeight: 600,
                       color: c,
                       textDecoration: isDone ? 'line-through' : 'none',
@@ -154,13 +154,14 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height 
                   {test.urgent && (
                     <Box
                       sx={{
+                        fontFamily: '"Roboto Condensed", Arial, sans-serif',
                         px: 0.6,
                         py: 0.05,
                         bgcolor: c,
                         color: '#fff',
-                        fontSize: 9,
+                        fontSize: 9.5,
                         fontWeight: 700,
-                        letterSpacing: '0.04em',
+                        letterSpacing: '0.06em',
                         borderRadius: '3px',
                       }}
                     >
@@ -170,7 +171,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height 
                 </Stack>
                 <Typography
                   sx={{
-                    fontSize: 10.5,
+                    fontSize: 10,
                     color: 'text.secondary',
                     lineHeight: 1.3,
                     overflow: 'hidden',

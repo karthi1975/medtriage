@@ -46,21 +46,22 @@ const FieldRow: React.FC<FieldRowProps> = ({ label, children, full, emphasis }) 
     <Stack direction="row" spacing={0.75} alignItems="baseline" sx={{ minWidth: 0 }}>
       <Typography
         sx={{
-          fontSize: 9.5,
+          fontFamily: '"Roboto Condensed", Arial, sans-serif',
+          fontSize: 10,
           fontWeight: 700,
-          letterSpacing: '0.10em',
+          letterSpacing: '0.08em',
           textTransform: 'uppercase',
           color: 'text.disabled',
           flexShrink: 0,
-          minWidth: 70,
+          minWidth: 64,
         }}
       >
         {label}
       </Typography>
       <Typography
         sx={{
-          fontSize: 11.5,
-          lineHeight: 1.35,
+          fontSize: 11,
+          lineHeight: 1.3,
           fontWeight: emphasis ? 600 : 400,
           color: emphasis
             ? theme.palette.priority?.emergency ?? theme.palette.error.main
@@ -121,12 +122,12 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
         borderLeft: '4px solid',
         borderLeftColor: stripeColor,
         borderRadius: '4px',
-        px: 1.25,
-        py: 0.85,
+        px: 1,
+        py: 0.65,
         flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
-        gap: 0.5,
+        gap: 0.3,
       }}
     >
       {/* Row 1: identity — defensive fallbacks so this row never collapses
@@ -145,7 +146,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
           MRN {patient.id}
         </Typography>
         <Box sx={{ width: 1, height: 18, bgcolor: 'divider', flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 13.5, fontWeight: 600, minWidth: 0 }} noWrap>
+        <Typography sx={{ fontSize: 13, fontWeight: 600, minWidth: 0 }} noWrap>
           {(patient.name && patient.name.trim()) || `Patient ${patient.id}`}
         </Typography>
         {(() => {
@@ -161,7 +162,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
           return (
             <Typography
               sx={{
-                fontSize: 11,
+                fontSize: 10.5,
                 color: parts.length > 0 ? 'text.secondary' : 'text.disabled',
                 fontStyle: parts.length > 0 ? 'normal' : 'italic',
                 flexShrink: 0,

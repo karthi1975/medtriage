@@ -67,20 +67,22 @@ export const PanelShell: React.FC<PanelShellProps> = ({
         justifyContent="space-between"
         spacing={1}
         sx={{
-          px: 1.25,
-          py: 0.6,
+          px: 1,
+          py: 0.4,
           bgcolor: titleBarBg,
           borderBottom: '1px solid',
           borderColor: 'divider',
           flexShrink: 0,
+          minHeight: 24,
         }}
       >
         <Stack direction="row" alignItems="baseline" spacing={1} sx={{ minWidth: 0 }}>
           <Typography
             sx={{
-              fontSize: 10.5,
+              fontFamily: '"Roboto Condensed", Arial, sans-serif',
+              fontSize: 11,
               fontWeight: 700,
-              letterSpacing: '0.10em',
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
               color: 'text.secondary',
               lineHeight: 1.1,
@@ -90,7 +92,14 @@ export const PanelShell: React.FC<PanelShellProps> = ({
             {title}
           </Typography>
           {subtitle && (
-            <Typography sx={{ fontSize: 10.5, color: 'text.disabled' }} noWrap>
+            <Typography
+              sx={{
+                fontFamily: '"Roboto Condensed", Arial, sans-serif',
+                fontSize: 10.5,
+                color: 'text.disabled',
+              }}
+              noWrap
+            >
               {subtitle}
             </Typography>
           )}
@@ -101,7 +110,7 @@ export const PanelShell: React.FC<PanelShellProps> = ({
           </Stack>
         )}
       </Stack>
-      <Box sx={{ p: 1.25, overflowY: 'auto', flex: 1, minHeight: 0 }}>{children}</Box>
+      <Box sx={{ p: 1, overflowY: 'auto', flex: 1, minHeight: 0 }}>{children}</Box>
     </Box>
   );
 };

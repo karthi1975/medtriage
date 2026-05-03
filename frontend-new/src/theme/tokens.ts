@@ -182,6 +182,10 @@ export const fontFamilyBrand =
   '"Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif';
 export const fontFamilyMono =
   '"Roboto Mono", "SF Mono", Menlo, Consolas, monospace';
+/** Condensed sans for EMR-style section labels — narrower glyphs, more
+ * data per inch without losing legibility. */
+export const fontFamilyCondensed =
+  '"Roboto Condensed", "Arial Narrow", "Helvetica Neue", sans-serif';
 
 /** Clinical priority ladder — kept separate from M3 roles by design. */
 export const priority = {
