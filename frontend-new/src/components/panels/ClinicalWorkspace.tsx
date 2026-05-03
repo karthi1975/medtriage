@@ -16,10 +16,14 @@ import { TodayAppointmentsPane } from './TodayAppointmentsPane';
 import { TriagePanel } from './TriagePanel';
 import { OrdersPanel } from './OrdersPanel';
 import { PatientCard } from './PatientCard';
+import { useEnrichedPatient } from '../../hooks/useEnrichedPatient';
 import type { ChatMessage } from '../../types';
 
 export const ClinicalWorkspace: React.FC = () => {
   const { messages, currentPatient } = useChat();
+  // Backfill any missing identity fields from /api/v1/patients/{id} so the
+  // header is always complete even when chat returns a stripped patient.
+  const enrichedPatient = useEnrichedPatient(currentPatient);
 
   // Pull the latest assistant message metadata — that's where triage +
   // testingStatus + slots accumulate. Walking from the end is cheaper than
@@ -38,9 +42,13 @@ export const ClinicalWorkspace: React.FC = () => {
   }
 
   // Patient in context → comprehensive PatientCard + Triage | Orders side-by-side.
+  // Use the enriched patient when available, otherwise fall back to the
+  // chat stub so the card never disappears while a fetch is in flight.
+  const patientForCard = enrichedPatient ?? currentPatient;
+
   return (
     <Stack spacing={0.75} sx={{ flexShrink: 0 }}>
-      <PatientCard patient={currentPatient} />
+      <PatientCard patient={patientForCard} />
       <Box
         sx={{
           display: 'grid',

@@ -130,49 +130,74 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
         gap: 0.3,
       }}
     >
-      {/* Row 1: identity — defensive fallbacks so this row never collapses
-          to blank when the backend returns sparse demographics. */}
-      <Stack direction="row" alignItems="center" spacing={1.25}>
-        <Typography
-          sx={{
-            fontFamily: '"Roboto Mono", monospace',
-            fontVariantNumeric: 'tabular-nums',
-            fontWeight: 700,
-            fontSize: 12,
-            color: theme.palette.brand?.navy ?? 'text.primary',
-            flexShrink: 0,
-          }}
-        >
-          MRN {patient.id}
-        </Typography>
-        <Box sx={{ width: 1, height: 18, bgcolor: 'divider', flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 13, fontWeight: 600, minWidth: 0 }} noWrap>
-          {(patient.name && patient.name.trim()) || `Patient ${patient.id}`}
-        </Typography>
-        {(() => {
-          // Build demographics line; show em-dash for any missing piece so
-          // the structure stays readable even when the backend sends nulls.
-          const ageStr = patient.age != null ? `${patient.age}y` : null;
-          const sexStr = patient.gender && patient.gender.trim() ? patient.gender : null;
-          const dobStr =
-            patient.birthDate && patient.birthDate.trim() ? `DOB ${patient.birthDate}` : null;
-          const parts = [ageStr, sexStr, dobStr].filter(Boolean);
-          const demoLine =
-            parts.length > 0 ? parts.join(' · ') : 'Age / sex / DOB not on file';
-          return (
-            <Typography
-              sx={{
-                fontSize: 10.5,
-                color: parts.length > 0 ? 'text.secondary' : 'text.disabled',
-                fontStyle: parts.length > 0 ? 'normal' : 'italic',
-                flexShrink: 0,
-              }}
-              noWrap
-            >
-              {demoLine}
-            </Typography>
-          );
-        })()}
+      {/* Row 1: identity + allergy badge.
+          Identity block uses <Box component="span"> not <Typography> so flex
+          shrinking can't hide content. The block is flex-shrink:0 as a unit
+          → MRN+name+demos always render at content width; only the spacer
+          absorbs leftover space. Allergy badge floats right. */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.25, flexShrink: 0 }}>
+          <Box
+            component="span"
+            sx={{
+              fontFamily: '"Roboto Mono", monospace',
+              fontVariantNumeric: 'tabular-nums',
+              fontWeight: 700,
+              fontSize: 12,
+              color: theme.palette.brand?.navy ?? 'text.primary',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            MRN {patient.id || '?'}
+          </Box>
+          <Box
+            aria-hidden
+            sx={{
+              display: 'inline-block',
+              width: 1,
+              height: 14,
+              bgcolor: 'divider',
+              transform: 'translateY(2px)',
+            }}
+          />
+          <Box
+            component="span"
+            sx={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'text.primary',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {(patient.name && String(patient.name).trim()) ||
+              `Patient ${patient.id ?? 'unknown'}`}
+          </Box>
+          {(() => {
+            const ageStr = patient.age != null ? `${patient.age}y` : null;
+            const sexStr =
+              patient.gender && String(patient.gender).trim() ? patient.gender : null;
+            const dobStr =
+              patient.birthDate && String(patient.birthDate).trim()
+                ? `DOB ${patient.birthDate}`
+                : null;
+            const parts = [ageStr, sexStr, dobStr].filter(Boolean);
+            const demoLine =
+              parts.length > 0 ? parts.join(' · ') : 'Age / sex / DOB not on file';
+            return (
+              <Box
+                component="span"
+                sx={{
+                  fontSize: 10.5,
+                  color: parts.length > 0 ? 'text.secondary' : 'text.disabled',
+                  fontStyle: parts.length > 0 ? 'normal' : 'italic',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {demoLine}
+              </Box>
+            );
+          })()}
+        </Box>
         <Box sx={{ flex: 1 }} />
         {hasAllergies && (
           <Tooltip title={allergies.join(', ')} placement="bottom-end">
@@ -197,7 +222,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
             </Stack>
           </Tooltip>
         )}
-      </Stack>
+      </Box>
 
       {/* Row 2: clinical (allergies / conditions / meds) */}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, columnGap: 1.5, rowGap: 0.25 }}>
