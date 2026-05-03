@@ -19,6 +19,19 @@ interface PatientCardProps {
   patient: Patient;
 }
 
+/**
+ * "No known drug allergies" sentinels — clinical text patterns that mean
+ * ZERO allergies. The backend often stores these as a one-element array,
+ * which would otherwise trip every "has allergies" check.
+ */
+const ALLERGY_NEGATIVE_RE =
+  /^\s*(nkda|nka|no\s+(known\s+)?(drug\s+)?allergies?|none(\s+reported)?|denies\s+allergies)\s*\.?\s*$/i;
+
+function filterRealAllergies(allergies: string[] | undefined): string[] {
+  if (!allergies) return [];
+  return allergies.filter((a) => a && !ALLERGY_NEGATIVE_RE.test(a));
+}
+
 interface FieldRowProps {
   label: string;
   children: React.ReactNode;
@@ -81,7 +94,9 @@ function compress(items: string[] | undefined, max = 3): { display: string; full
 
 export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
   const theme = useTheme();
-  const allergies = patient.allergies || [];
+  // Strip NKDA-style sentinels before counting — "No known drug allergies"
+  // is the opposite of an alert and must not turn the card red.
+  const allergies = filterRealAllergies(patient.allergies);
   const conditions = patient.conditions || [];
   const meds = (patient.medications || []).map((m) =>
     m.dosage ? `${m.medication} ${m.dosage}` : m.medication,
@@ -114,7 +129,8 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
         gap: 0.5,
       }}
     >
-      {/* Row 1: identity */}
+      {/* Row 1: identity — defensive fallbacks so this row never collapses
+          to blank when the backend returns sparse demographics. */}
       <Stack direction="row" alignItems="center" spacing={1.25}>
         <Typography
           sx={{
@@ -130,17 +146,32 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
         </Typography>
         <Box sx={{ width: 1, height: 18, bgcolor: 'divider', flexShrink: 0 }} />
         <Typography sx={{ fontSize: 13.5, fontWeight: 600, minWidth: 0 }} noWrap>
-          {patient.name || 'Unknown patient'}
+          {(patient.name && patient.name.trim()) || `Patient ${patient.id}`}
         </Typography>
-        <Typography sx={{ fontSize: 11, color: 'text.secondary', flexShrink: 0 }} noWrap>
-          {[
-            patient.age != null ? `${patient.age}y` : null,
-            patient.gender || null,
-            patient.birthDate ? `DOB ${patient.birthDate}` : null,
-          ]
-            .filter(Boolean)
-            .join(' · ')}
-        </Typography>
+        {(() => {
+          // Build demographics line; show em-dash for any missing piece so
+          // the structure stays readable even when the backend sends nulls.
+          const ageStr = patient.age != null ? `${patient.age}y` : null;
+          const sexStr = patient.gender && patient.gender.trim() ? patient.gender : null;
+          const dobStr =
+            patient.birthDate && patient.birthDate.trim() ? `DOB ${patient.birthDate}` : null;
+          const parts = [ageStr, sexStr, dobStr].filter(Boolean);
+          const demoLine =
+            parts.length > 0 ? parts.join(' · ') : 'Age / sex / DOB not on file';
+          return (
+            <Typography
+              sx={{
+                fontSize: 11,
+                color: parts.length > 0 ? 'text.secondary' : 'text.disabled',
+                fontStyle: parts.length > 0 ? 'normal' : 'italic',
+                flexShrink: 0,
+              }}
+              noWrap
+            >
+              {demoLine}
+            </Typography>
+          );
+        })()}
         <Box sx={{ flex: 1 }} />
         {hasAllergies && (
           <Tooltip title={allergies.join(', ')} placement="bottom-end">

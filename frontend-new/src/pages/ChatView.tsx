@@ -43,9 +43,11 @@ export const ChatView: React.FC = () => {
   const navigate = useNavigate();
   const { mode } = useThemeMode();
   const theme = useTheme();
-  // Below 1280: collapse the right rail to a drawer (per v2 layout spec).
-  // Hook must be at top level — never call hooks inside the m3 branch.
-  const isCompact = useMediaQuery('(max-width:1279px)');
+  // Below 1080: collapse the right rail to a drawer (chat needs ~600px,
+  // rail needs ~420px). At ≥1080 the rail is permanently inline — Epic's
+  // permanent-sidebar pattern. Hook must be at top level — never call hooks
+  // inside the m3 branch.
+  const isCompact = useMediaQuery('(max-width:1079px)');
   const [rightSheetOpen, setRightSheetOpen] = useState(true);
   const { session, logout } = useMASession();
   const { currentPatient, clearChat, messages } = useChat();
@@ -240,8 +242,10 @@ export const ChatView: React.FC = () => {
           </Box>
           <SideSheet
             open={railOpen}
-            onClose={() => setRightSheetOpen(false)}
-            title="Patient context"
+            // No close X when the rail is permanent — only allow closing
+            // when we're in compact/drawer mode.
+            onClose={isCompact ? () => setRightSheetOpen(false) : undefined}
+            title="Available slots"
             width={420}
             headerTint
           >
