@@ -47,7 +47,7 @@ export const PanelShell: React.FC<PanelShellProps> = ({
         bgcolor: 'background.paper',
         border: '1px solid',
         borderColor: 'divider',
-        borderRadius: '6px',
+        borderRadius: '4px',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',

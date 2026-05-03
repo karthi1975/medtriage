@@ -15,7 +15,7 @@ import { useChat } from '../../context/ChatContext';
 import { TodayAppointmentsPane } from './TodayAppointmentsPane';
 import { TriagePanel } from './TriagePanel';
 import { OrdersPanel } from './OrdersPanel';
-import { PatientBanner } from './PatientBanner';
+import { PatientCard } from './PatientCard';
 import type { ChatMessage } from '../../types';
 
 export const ClinicalWorkspace: React.FC = () => {
@@ -37,10 +37,10 @@ export const ClinicalWorkspace: React.FC = () => {
     return <TodayAppointmentsPane height={196} />;
   }
 
-  // Patient in context → banner + Triage | Orders side-by-side.
+  // Patient in context → comprehensive PatientCard + Triage | Orders side-by-side.
   return (
     <Stack spacing={0.75} sx={{ flexShrink: 0 }}>
-      <PatientBanner patient={currentPatient} />
+      <PatientCard patient={currentPatient} />
       <Box
         sx={{
           display: 'grid',
@@ -48,8 +48,8 @@ export const ClinicalWorkspace: React.FC = () => {
           gap: 0.75,
         }}
       >
-        <TriagePanel triage={latestMetadata?.triage} height={232} />
-        <OrdersPanel testingStatus={latestMetadata?.testingStatus} height={232} />
+        <TriagePanel triage={latestMetadata?.triage} height={210} />
+        <OrdersPanel testingStatus={latestMetadata?.testingStatus} height={210} />
       </Box>
     </Stack>
   );
