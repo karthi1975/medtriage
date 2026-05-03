@@ -1,19 +1,13 @@
 /**
- * Today's Appointments pane — top-left region of the v2 3-region layout.
+ * Today's Appointments pane — horizontal calendar-agenda strip above the chat.
  *
- * Subscribes to `useTodayAppointments` (shared with the welcome hero stats)
- * so both surfaces show the same numbers and refresh in lockstep.
+ * Each appointment is a 160×110 card, laid out left-to-right and horizontally
+ * scrollable when there are more than fit. Past appointments dim + line-
+ * through the time so the MA can scan for "what's next" at a glance.
+ * Click a card → the patient enters chat context.
  *
- * Design principles encoded here:
- *   - A schedule fetch failure is recoverable, so we never red-alert. A
- *     compact amber strip sits *above* whatever data we have, the body stays
- *     usable, and "Why?" reveals the backend's actual reason for diagnosis.
- *   - Emergency / urgent rows float to the top so Sarah sees them first.
- *   - Click feedback is instant via a local `selectedId` — the chat round
- *     trip can take seconds, but the row reads as "selected" the moment she
- *     clicks.
- *   - "Updated 12s ago" gives Sarah confidence the data is fresh, even when
- *     no new appointments have arrived.
+ * Subscribes to `useTodayAppointments` (shared with the welcome hero stat
+ * tiles) so both surfaces show the same numbers and refresh in lockstep.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -46,7 +40,7 @@ const URGENCY_LABEL: Record<Urgency, string> = {
   'non-urgent': 'ROUTINE',
 };
 
-// Lower number = floats higher in the sort.
+// Lower number = floats higher in the sort (within the upcoming bucket).
 const URGENCY_RANK: Record<Urgency, number> = {
   emergency: 0,
   urgent: 1,
@@ -70,13 +64,14 @@ function todayLabel(): string {
   });
 }
 
-interface RowProps {
+interface CardProps {
   appt: Appointment;
   selected: boolean;
+  isPast: boolean;
   onSelect: (appt: Appointment) => void;
 }
 
-const AppointmentRow: React.FC<RowProps> = ({ appt, selected, onSelect }) => {
+const AppointmentCard: React.FC<CardProps> = ({ appt, selected, isPast, onSelect }) => {
   const theme = useTheme();
   const { hhmm, ampm } = formatTime(appt.appointment_datetime);
   const p = theme.palette.priority;
@@ -102,28 +97,34 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, selected, onSelect }) => {
     <ButtonBase
       focusRipple
       onClick={() => onSelect(appt)}
-      aria-label={`Open patient ${appt.patient_fhir_id} at ${hhmm} ${ampm}`}
+      aria-label={`Open patient ${appt.patient_fhir_id} at ${hhmm} ${ampm}${isPast ? ' (past)' : ''}`}
       aria-current={selected ? 'true' : undefined}
       sx={{
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '54px 1fr 110px 76px',
-        alignItems: 'center',
-        columnGap: 1.25,
-        px: 1.25,
-        py: 1,
+        flex: '0 0 168px',
+        minWidth: 168,
+        maxWidth: 168,
+        height: 116,
+        scrollSnapAlign: 'start',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        justifyContent: 'flex-start',
+        textAlign: 'left',
+        opacity: isPast ? 0.55 : 1,
         bgcolor: selected ? 'rgba(26,115,232,0.06)' : 'background.paper',
         border: '1px solid',
         borderColor: selected ? 'primary.main' : 'divider',
         borderLeft: '4px solid',
         borderLeftColor: borderColor || 'divider',
-        borderRadius: 1,
-        textAlign: 'left',
+        borderRadius: 1.5,
+        px: 1.25,
+        py: 1,
         transition: 'all 0.18s',
         '&:hover': {
           borderColor: 'primary.main',
-          boxShadow: 1,
-          transform: 'translateY(-1px)',
+          boxShadow: 2,
+          transform: 'translateY(-2px)',
+          opacity: 1,
         },
         '&:focus-visible': {
           outline: `2px solid ${theme.palette.primary.main}`,
@@ -131,30 +132,50 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, selected, onSelect }) => {
         },
       }}
     >
-      <Box>
-        <Typography
+      {/* Top: time + urgency pill */}
+      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={0.5}>
+        <Box>
+          <Typography
+            sx={{
+              fontFamily: '"Roboto Mono", monospace',
+              fontVariantNumeric: 'tabular-nums',
+              fontWeight: 700,
+              fontSize: 15,
+              lineHeight: 1.05,
+              color: theme.palette.brand?.navy ?? 'text.primary',
+              textDecoration: isPast ? 'line-through' : 'none',
+            }}
+          >
+            {hhmm}
+          </Typography>
+          <Typography sx={{ fontSize: 10, color: 'text.secondary', lineHeight: 1.05 }}>
+            {ampm}
+          </Typography>
+        </Box>
+        <Box
           sx={{
-            fontFamily: '"Roboto Mono", monospace',
-            fontVariantNumeric: 'tabular-nums',
+            px: 0.75,
+            py: 0.15,
+            borderRadius: '999px',
+            fontSize: 9,
             fontWeight: 600,
-            fontSize: 13,
-            lineHeight: 1.1,
-            color: theme.palette.brand?.navy ?? 'text.primary',
+            letterSpacing: '0.04em',
+            bgcolor: pillBg,
+            color: borderColor,
+            whiteSpace: 'nowrap',
           }}
         >
-          {hhmm}
-        </Typography>
-        <Typography sx={{ fontSize: 10, fontWeight: 400, color: 'text.secondary', lineHeight: 1.1 }}>
-          {ampm}
-        </Typography>
-      </Box>
+          {URGENCY_LABEL[appt.urgency]}
+        </Box>
+      </Stack>
 
-      <Box sx={{ minWidth: 0 }}>
+      {/* Middle: patient + reason */}
+      <Box sx={{ minWidth: 0, mt: 0.75, flex: 1 }}>
         <Typography
           sx={{
-            fontWeight: 500,
-            fontSize: 13,
-            lineHeight: 1.25,
+            fontWeight: 600,
+            fontSize: 12,
+            lineHeight: 1.2,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -164,45 +185,32 @@ const AppointmentRow: React.FC<RowProps> = ({ appt, selected, onSelect }) => {
         </Typography>
         <Typography
           sx={{
-            fontSize: 11,
+            fontSize: 10.5,
             color: 'text.secondary',
+            lineHeight: 1.25,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
           }}
         >
           {appt.reason_for_visit}
         </Typography>
       </Box>
 
+      {/* Bottom: provider */}
       <Typography
         sx={{
-          fontSize: 11,
+          fontSize: 10,
           color: 'text.secondary',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          mt: 'auto',
         }}
       >
         {appt.provider.name}
       </Typography>
-
-      <Box
-        sx={{
-          justifySelf: 'end',
-          px: 1,
-          py: 0.25,
-          borderRadius: '999px',
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: '0.04em',
-          bgcolor: pillBg,
-          color: borderColor,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {URGENCY_LABEL[appt.urgency]}
-      </Box>
     </ButtonBase>
   );
 };
@@ -293,12 +301,12 @@ const SoftErrorStrip: React.FC<SoftErrorStripProps> = ({
 };
 
 export interface TodayAppointmentsPaneProps {
-  /** Pixel height of the pane (default 340 per spec). */
+  /** Pixel height of the pane (default 196 — header + horizontal card row). */
   height?: number | string;
 }
 
 export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
-  height = 340,
+  height = 196,
 }) => {
   const theme = useTheme();
   const { sendMessage } = useChat();
@@ -312,30 +320,51 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
     refresh,
   } = useTodayAppointments();
 
-  // Optimistic selection: highlight immediately on click; clear when chat
-  // round-trip is in flight isn't tracked here — the highlight just persists,
-  // which matches "this is the patient we're working on now."
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  // Tick a "now" so "Updated 12s ago" stays fresh without re-rendering rows.
+  // Re-tick "Updated 12s ago" without re-rendering rows.
   const [, setNowTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setNowTick((n) => n + 1), 15_000);
     return () => clearInterval(id);
   }, []);
 
-  // Sort: emergency/urgent float to top, then by time ascending.
-  const sorted = React.useMemo(
+  // Sort: upcoming (urgency desc, then time asc) first, then past (most recent
+  // first). Past = appt time is more than 5 min ago — small grace window so a
+  // 10:00 appt at 10:03 still reads as "now."
+  const nowMs = Date.now();
+  const sorted = React.useMemo(() => {
+    const upcoming: Appointment[] = [];
+    const past: Appointment[] = [];
+    for (const a of appointments) {
+      const t = new Date(a.appointment_datetime).getTime();
+      if (t + 5 * 60_000 >= nowMs) upcoming.push(a);
+      else past.push(a);
+    }
+    upcoming.sort((a, b) => {
+      const r = URGENCY_RANK[a.urgency] - URGENCY_RANK[b.urgency];
+      if (r !== 0) return r;
+      return (
+        new Date(a.appointment_datetime).getTime() -
+        new Date(b.appointment_datetime).getTime()
+      );
+    });
+    past.sort(
+      (a, b) =>
+        new Date(b.appointment_datetime).getTime() -
+        new Date(a.appointment_datetime).getTime(),
+    );
+    return [...upcoming, ...past];
+  }, [appointments, nowMs]);
+
+  const pastSet = React.useMemo(
     () =>
-      [...appointments].sort((a, b) => {
-        const r = URGENCY_RANK[a.urgency] - URGENCY_RANK[b.urgency];
-        if (r !== 0) return r;
-        return (
-          new Date(a.appointment_datetime).getTime() -
-          new Date(b.appointment_datetime).getTime()
-        );
-      }),
-    [appointments],
+      new Set(
+        appointments
+          .filter((a) => new Date(a.appointment_datetime).getTime() + 5 * 60_000 < nowMs)
+          .map((a) => a.appointment_id),
+      ),
+    [appointments, nowMs],
   );
 
   const handleSelect = useCallback(
@@ -348,7 +377,7 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
     [sendMessage],
   );
 
-  const pendingCount = sorted.filter(
+  const pendingCount = appointments.filter(
     (a) => a.status === 'scheduled' || a.status === 'confirmed',
   ).length;
 
@@ -386,7 +415,7 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           px: 1.75,
-          py: 1.25,
+          py: 1,
           bgcolor: 'background.paper',
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -425,35 +454,38 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
       </Box>
 
       {/* Body */}
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 1.75, py: 1.25 }}>
-        {/* Soft amber error strip — sits ABOVE data, never replaces it */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        {/* Soft amber error strip — sits above data, never replaces it */}
         {error && (
-          <SoftErrorStrip
-            message={error.message}
-            detail={error.detail}
-            onRetry={refresh}
-            isRetrying={isRefreshing}
-            isStale={isStale}
-          />
+          <Box sx={{ px: 1.75, pt: 1 }}>
+            <SoftErrorStrip
+              message={error.message}
+              detail={error.detail}
+              onRetry={refresh}
+              isRetrying={isRefreshing}
+              isStale={isStale}
+            />
+          </Box>
         )}
 
         {isLoading && appointments.length === 0 ? (
-          <Stack spacing={0.75}>
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="rounded" height={52} />
+          <Box sx={{ display: 'flex', gap: 1, px: 1.75, py: 1.25, overflowX: 'hidden' }}>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} variant="rounded" sx={{ flex: '0 0 168px', height: 116 }} />
             ))}
-          </Stack>
+          </Box>
         ) : sorted.length === 0 ? (
           <Box
             sx={{
-              height: '100%',
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
               color: 'text.secondary',
-              py: 3,
+              px: 2,
+              py: 1,
             }}
           >
             <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
@@ -461,23 +493,42 @@ export const TodayAppointmentsPane: React.FC<TodayAppointmentsPaneProps> = ({
                 ? "We couldn't load today's schedule yet"
                 : 'No appointments today'}
             </Typography>
-            <Typography sx={{ fontSize: 11, mt: 0.5, maxWidth: 260 }}>
+            <Typography sx={{ fontSize: 11, mt: 0.5, maxWidth: 320 }}>
               {error
                 ? "We'll keep trying. You can still pull up patients from chat."
                 : 'Walk-ins and triage from chat will appear here once scheduled.'}
             </Typography>
           </Box>
         ) : (
-          <Stack spacing={0.75}>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'stretch',
+              gap: 1,
+              px: 1.75,
+              py: 1.25,
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              scrollSnapType: 'x proximity',
+              // Slim scrollbar that doesn't dominate the strip.
+              '&::-webkit-scrollbar': { height: 6 },
+              '&::-webkit-scrollbar-thumb': {
+                bgcolor: 'rgba(0,0,0,0.18)',
+                borderRadius: 999,
+              },
+            }}
+          >
             {sorted.map((appt) => (
-              <AppointmentRow
+              <AppointmentCard
                 key={appt.appointment_id}
                 appt={appt}
                 selected={selectedId === appt.appointment_id}
+                isPast={pastSet.has(appt.appointment_id)}
                 onSelect={handleSelect}
               />
             ))}
-          </Stack>
+          </Box>
         )}
       </Box>
     </Box>

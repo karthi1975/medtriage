@@ -220,7 +220,7 @@ export const ChatView: React.FC = () => {
             minWidth={0}
             sx={{ bgcolor: canvasBg, gap: 1.25, p: { xs: 1, md: 1.25 } }}
           >
-            <TodayAppointmentsPane height={340} />
+            <TodayAppointmentsPane height={196} />
             <Box
               sx={{
                 flex: 1,
