@@ -36,7 +36,7 @@ import { AppointmentSchedulingPanel } from '../components/intelligent-triage/App
 import intelligentTriageApi from '../services/intelligentTriageApi';
 import { useThemeMode } from '../theme/ThemeModeProvider';
 import { TopAppBarSmall, SideSheet } from '../components/md3';
-import { TodayAppointmentsPane } from '../components/panels/TodayAppointmentsPane';
+import { ClinicalWorkspace } from '../components/panels/ClinicalWorkspace';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 export const ChatView: React.FC = () => {
@@ -220,7 +220,7 @@ export const ChatView: React.FC = () => {
             minWidth={0}
             sx={{ bgcolor: canvasBg, gap: 1.25, p: { xs: 1, md: 1.25 } }}
           >
-            <TodayAppointmentsPane height={196} />
+            <ClinicalWorkspace />
             <Box
               sx={{
                 flex: 1,

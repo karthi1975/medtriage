@@ -1,121 +1,102 @@
 /**
- * ChatView right-panel content.
+ * RightPanelContent — slots-only rail.
  *
- * Extracted from ChatView.tsx so both the legacy and the M3 chat shells
- * render the same workflow surfaces (DetailsPanel, ProtocolActivationCard,
- * TestOrderingTimeline, AppointmentSchedulingPanel, PatientSummaryPanel).
+ * Per the EPIC-style restructure: the right rail's single purpose is now
+ * **what to book**. Patient identity, triage assessment, and order
+ * requirements live in the ClinicalWorkspace above the chat. The rail
+ * shows the slot recommendations (best-match + compact alternatives), or
+ * the booked appointment confirmation, or a friendly empty state.
  *
- * This component is render-only — all state comes from contexts, so it has
- * no props. Drop it inside whatever layout container the shell provides.
+ * The legacy chat shell still uses DetailsPanel directly — this only
+ * affects the m3 path.
  */
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import { useChat } from '../../context/ChatContext';
-import { useWorkflow } from '../../context/WorkflowContext';
-import { PatientSummaryPanel } from './PatientSummaryPanel';
-import { DetailsPanel } from './DetailsPanel';
-import ProtocolActivationCard from '../intelligent-triage/ProtocolActivationCard';
-import TestOrderingTimeline from '../intelligent-triage/TestOrderingTimeline';
-import { AppointmentSchedulingPanel } from '../intelligent-triage/AppointmentSchedulingPanel';
+import { SlotRecommendations } from '../SlotRecommendations';
+import { AppointmentConfirmation } from '../AppointmentConfirmation';
 
 export const RightPanelContent: React.FC = () => {
-  const { messages, currentPatient } = useChat();
-  const {
-    state: workflowState,
-    markActionComplete,
-    addScheduledTest,
-    markTestComplete,
-    setSelectedAppointment,
-  } = useWorkflow();
+  const theme = useTheme();
+  const { messages } = useChat();
 
-  const lastMessageWithMetadata = [...messages]
-    .reverse()
-    .find((msg) => msg.role === 'assistant' && msg.metadata);
+  // Latest assistant metadata — slots / confirmation accumulate here.
+  let metadata: any = null;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role === 'assistant' && m.metadata) {
+      metadata = m.metadata;
+      break;
+    }
+  }
 
-  if (lastMessageWithMetadata?.metadata) {
-    const metadata = lastMessageWithMetadata.metadata;
+  const slots = metadata?.availableSlots;
+  const confirmation = metadata?.appointmentConfirmation;
+  const triage = metadata?.triage;
+
+  if (confirmation) {
     return (
-      <>
-        {metadata.patient?.patient && (
-          <Box mb={2} pb={2} borderBottom="1px solid" borderColor="divider">
-            <Typography variant="h5" gutterBottom>
-              {metadata.patient.patient.name ?? 'Patient Details'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              ID: {metadata.patient.patient.id} • {metadata.patient.patient.age ?? 'Unknown'}y •{' '}
-              {metadata.patient.patient.gender ?? 'Unknown'}
-            </Typography>
-          </Box>
-        )}
-
-        <DetailsPanel metadata={metadata} />
-
-        {workflowState.activeWorkflow && workflowState.showProtocolCard && (
-          <Box mt={3}>
-            <ProtocolActivationCard
-              triageResult={workflowState.activeWorkflow}
-              onActionComplete={markActionComplete}
-              completedActions={workflowState.completedActions}
-            />
-          </Box>
-        )}
-
-        {workflowState.activeWorkflow &&
-          workflowState.showTestOrdering &&
-          !workflowState.showAppointmentScheduling && (
-            <Box mt={3}>
-              <TestOrderingTimeline
-                triageResult={workflowState.activeWorkflow}
-                scheduledTests={workflowState.scheduledTests}
-                completedTests={workflowState.completedTests}
-                onScheduleTest={(test, date, time) => {
-                  addScheduledTest({
-                    test_name: test.test,
-                    test_type: test.type || 'laboratory',
-                    scheduled_date: date,
-                    scheduled_time: time,
-                    fasting_required: test.fasting || false,
-                    reason: test.reason,
-                    status: 'scheduled',
-                    scheduled_at: new Date().toISOString(),
-                  });
-                }}
-                onMarkTestComplete={markTestComplete}
-                onEmailInstructions={() => console.log('Email instructions')}
-              />
-            </Box>
-          )}
-
-        {workflowState.activeWorkflow && workflowState.showAppointmentScheduling && (
-          <Box mt={3}>
-            <AppointmentSchedulingPanel
-              triageResult={workflowState.activeWorkflow}
-              onAppointmentBooked={setSelectedAppointment}
-            />
-          </Box>
-        )}
-      </>
+      <Box>
+        <AppointmentConfirmation
+          confirmationNumber={confirmation.confirmation_number}
+          appointmentId={confirmation.patient_id}
+          provider={confirmation.provider_name}
+          facility={confirmation.facility_name}
+          slotDatetime={`${confirmation.date} ${confirmation.time}`}
+          patientName={confirmation.patient_id}
+        />
+      </Box>
     );
   }
 
-  if (currentPatient) {
+  if (slots && slots.length > 0) {
     return (
-      <>
-        <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-          Patient Summary
-        </Typography>
-        <PatientSummaryPanel patient={currentPatient} />
-      </>
+      <SlotRecommendations
+        slots={slots}
+        urgency={triage?.urgency ?? triage?.priority}
+        onBookSlot={(slot) => {
+          console.log('Booking slot:', slot);
+          // TODO: POST /api/v1/scheduling/book once wired up
+        }}
+      />
     );
   }
 
   return (
-    <Box textAlign="center" mt={8}>
-      <Typography variant="h6" color="text.secondary" gutterBottom>
-        No Patient Selected
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Start a conversation to look up a patient or describe symptoms
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        textAlign: 'center',
+        color: 'text.secondary',
+        py: 6,
+        px: 2,
+      }}
+    >
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '14px',
+          background: theme.palette.brand?.gradient ?? 'linear-gradient(135deg,#1A73E8,#34A853)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+          mb: 1.5,
+          opacity: 0.9,
+        }}
+      >
+        <EventAvailableIcon />
+      </Box>
+      <Typography sx={{ fontSize: 14, fontWeight: 600 }}>Available slots will appear here</Typography>
+      <Typography sx={{ fontSize: 12, mt: 0.5, maxWidth: 260 }}>
+        Once triage runs, the recommended appointment slots show up — you can book the best match in
+        one tap.
       </Typography>
     </Box>
   );
