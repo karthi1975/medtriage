@@ -19,6 +19,8 @@ import {
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import { PanelShell } from './PanelShell';
 import { parseTestRequirements, getOrderColor, type TestRequirement } from '../../utils/clinicalParsers';
+import { useChat } from '../../context/ChatContext';
+import { useMASession } from '../../context/MASessionContext';
 import type { ChatMessage } from '../../types';
 
 type TestingStatus = NonNullable<ChatMessage['metadata']>['testingStatus'];
@@ -28,15 +30,56 @@ interface OrdersPanelProps {
   height?: number | string;
 }
 
+/**
+ * Per-patient localStorage key for order completion. Scoped by
+ * (patient_id, specialty_id) so a patient seen in two specialties tracks
+ * each set independently. Survives page reloads + tab switches; auto-evicts
+ * itself if testingStatus changes (new triage = new requirement set).
+ */
+const STORAGE_PREFIX = 'sx.orders.completed';
+function storageKey(patientId: string | null, specialtyId: number | null): string | null {
+  if (!patientId || specialtyId == null) return null;
+  return `${STORAGE_PREFIX}:${patientId}:${specialtyId}`;
+}
+
+function loadCompleted(key: string | null): Set<string> {
+  if (!key) return new Set();
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? new Set(arr) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCompleted(key: string | null, set: Set<string>) {
+  if (!key) return;
+  try {
+    localStorage.setItem(key, JSON.stringify([...set]));
+  } catch {
+    // localStorage unavailable / quota — silently ignore; in-memory state still works.
+  }
+}
+
 export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height }) => {
   const theme = useTheme();
-  const [completed, setCompleted] = useState<Set<string>>(new Set());
+  const { currentPatient } = useChat();
+  const { session } = useMASession();
+  const key = storageKey(currentPatient?.id ?? null, session?.specialty_id ?? null);
+
+  const [completed, setCompleted] = useState<Set<string>>(() => loadCompleted(key));
   const [tests, setTests] = useState<TestRequirement[]>([]);
+
+  // Reload completion from storage when patient or specialty switches.
+  useEffect(() => {
+    setCompleted(loadCompleted(key));
+  }, [key]);
 
   useEffect(() => {
     if (testingStatus?.formatted_message) {
       setTests(parseTestRequirements(testingStatus.formatted_message));
-      setCompleted(new Set()); // reset on new requirements
     } else {
       setTests([]);
     }
@@ -51,6 +94,7 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height 
       const next = new Set(prev);
       if (next.has(name)) next.delete(name);
       else next.add(name);
+      saveCompleted(key, next);
       return next;
     });
   };

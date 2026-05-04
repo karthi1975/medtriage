@@ -155,6 +155,30 @@ class APIService {
     return response.data;
   }
 
+  // ========== Appointment Booking ==========
+  async bookAppointment(request: {
+    provider_id: number;
+    facility_id: number;
+    specialty_id: number;
+    patient_fhir_id: string;
+    appointment_datetime: string;
+    duration_minutes?: number;
+    urgency: string;
+    reason_for_visit?: string;
+    triage_session_id?: string;
+    created_by?: string;
+  }): Promise<{
+    success: boolean;
+    appointment_id?: number | null;
+    confirmation_number?: string;
+    fhir_appointment_id?: string;
+    error?: string;
+    code?: number;
+  }> {
+    const response = await this.client.post('/api/v1/scheduling/book', request);
+    return response.data;
+  }
+
   // ========== Llama 4 API Integration ==========
   async llamaTest(): Promise<{ success: boolean; message: string; test_response?: any }> {
     const response = await this.client.get('/llama/test');
