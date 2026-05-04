@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SynaptixSchedule — Pitch deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Roboto+Condensed:wght@500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap">
+<style>
+  /* A4 landscape · 297 × 210 mm. One slide per page. */
+  @page { size: A4 landscape; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #F8FAFD; color: rgba(0,0,0,0.87); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: 'Roboto', -apple-system, sans-serif; }
+
+  .slide {
+    width: 297mm;
+    height: 210mm;
+    padding: 22mm 26mm;
+    position: relative;
+    page-break-after: always;
+    overflow: hidden;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+  }
+  .slide:last-child { page-break-after: auto; }
+
+  /* Brand utilities */
+  .brand-navy   { color: #0B1340; }
+  .brand-blue   { color: #1A73E8; }
+  .brand-green  { color: #34A853; }
+  .grad-bg {
+    background: linear-gradient(135deg, #0B1340 0%, #1A73E8 60%, #34A853 100%);
+    color: #fff;
+  }
+  .gradient-text {
+    background: linear-gradient(180deg, #4FC9E8 0%, #2EE2C8 55%, #1FE9A8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .wordmark {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .heading {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: #0B1340;
+    line-height: 1.1;
+  }
+  .eyebrow {
+    font-family: 'Roboto Condensed', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1A73E8;
+  }
+  .body { font-size: 17px; line-height: 1.55; color: rgba(0,0,0,0.78); }
+  .small { font-size: 13px; color: rgba(0,0,0,0.55); }
+
+  /* Top-bar mini brand chip on inner slides */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18mm;
+  }
+  .chip {
+    width: 30px; height: 30px; border-radius: 7px; background: #0B1340;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px -2px rgba(11,19,64,0.5);
+  }
+  .chip svg { width: 22px; height: 22px; }
+  .topbar .name {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700; font-size: 14px; color: #0B1340; letter-spacing: -0.01em;
+  }
+  .topbar .pageno { margin-left: auto; font-family: 'Roboto Mono', monospace; font-size: 11px; color: rgba(0,0,0,0.45); }
+
+  /* Footer rule */
+  .footer-rule {
+    position: absolute; left: 26mm; right: 26mm; bottom: 16mm;
+    height: 2px;
+    background: linear-gradient(90deg, #4FC9E8 0%, #2EE2C8 50%, #1FE9A8 100%);
+    opacity: 0.85;
+  }
+
+  /* ----- Slide 1: cover ----- */
+  .cover { padding: 0; }
+  .cover-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 30mm;
+    background: #ffffff;
+    position: relative;
+  }
+  .cover-mark {
+    width: 88px; height: 88px; border-radius: 18px; background: #0B1340;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 14px 40px -16px rgba(11,19,64,0.55);
+    margin-bottom: 28px;
+  }
+  .cover-mark svg { width: 60px; height: 60px; }
+  .cover-title {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 88px;
+    line-height: 1;
+    color: #0B1340;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
+  }
+  .cover-tag {
+    font-size: 22px;
+    color: rgba(0,0,0,0.66);
+    max-width: 760px;
+    line-height: 1.4;
+  }
+  .cover-meta {
+    position: absolute;
+    bottom: 30mm; left: 30mm;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    color: rgba(0,0,0,0.55);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cover-stripe {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 14px;
+    background: linear-gradient(90deg, #4FC9E8 0%, #2EE2C8 50%, #1FE9A8 100%);
+  }
+
+  /* ----- Big number callouts ----- */
+  .big-stat {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .stat-label {
+    font-family: 'Roboto Condensed', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(0,0,0,0.55);
+    margin-top: 6px;
+  }
+
+  /* Three-stat row on the math slide */
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 22mm;
+    margin-top: 14mm;
+    align-items: end;
+  }
+  .stat-row .col { display: flex; flex-direction: column; align-items: flex-start; }
+
+  /* Tech chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 10px 12px; margin-top: 8mm; max-width: 220mm; }
+  .tech-chip {
+    border: 1px solid rgba(60,64,67,0.18);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0B1340;
+    background: #fff;
+  }
+  .tech-chip strong { font-weight: 700; }
+
+  /* Story slide quote */
+  .quote {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.35;
+    color: #0B1340;
+    max-width: 200mm;
+    margin-top: 4mm;
+  }
+  .quote .accent { color: #1A73E8; }
+  .attribution {
+    margin-top: 12mm;
+    font-size: 14px;
+    color: rgba(0,0,0,0.55);
+  }
+
+  /* Demo bullets */
+  .demo-list {
+    list-style: none;
+    padding: 0;
+    margin: 6mm 0 0 0;
+    max-width: 220mm;
+  }
+  .demo-list li {
+    padding: 10px 0 10px 18px;
+    font-size: 17px;
+    line-height: 1.45;
+    color: rgba(0,0,0,0.85);
+    border-top: 1px solid rgba(60,64,67,0.10);
+    position: relative;
+  }
+  .demo-list li:first-child { border-top: 0; }
+  .demo-list li::before {
+    content: ''; position: absolute; left: 0; top: 18px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: linear-gradient(135deg, #1A73E8, #34A853);
+  }
+
+  /* Closing slide */
+  .close-card {
+    margin-top: 8mm;
+    background: linear-gradient(135deg, #0B1340 0%, #1A73E8 100%);
+    color: #fff;
+    border-radius: 18px;
+    padding: 36px 44px;
+    box-shadow: 0 30px 60px -30px rgba(11,19,64,0.5);
+  }
+  .close-card .h {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    letter-spacing: -0.015em;
+    margin-bottom: 10px;
+  }
+  .close-card .b { font-size: 17px; opacity: 0.92; line-height: 1.5; max-width: 600px; }
+</style>
+</head>
+<body>
+
+<!-- ============== SLIDE 1: COVER ============== -->
+<section class="slide cover">
+  <div class="cover-inner">
+    <div class="cover-mark">
+      <!-- Inline brand mark: navy chip + gradient circuit-S -->
+      <svg viewBox="0 0 32 32" aria-hidden>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4FC9E8"/>
+            <stop offset="55%" stop-color="#2EE2C8"/>
+            <stop offset="100%" stop-color="#1FE9A8"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke="url(#g1)" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter">
+          <path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/>
+        </g>
+        <g fill="url(#g1)">
+          <circle cx="24" cy="5" r="1.6"/>
+          <circle cx="9" cy="27" r="1.6"/>
+        </g>
+      </svg>
+    </div>
+    <div class="cover-title wordmark">SynaptixSchedule</div>
+    <div class="cover-tag">A simple tool for the medical assistants doing the hardest work.</div>
+    <div class="cover-meta">Pitch deck · May 2026</div>
+  </div>
+  <div class="cover-stripe"></div>
+</section>
+
+<!-- ============== SLIDE 2: THE PROBLEM ============== -->
+<section class="slide">
+  <div class="topbar">
+    <div class="chip">
+      <svg viewBox="0 0 32 32" aria-hidden>
+        <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC9E8"/><stop offset="55%" stop-color="#2EE2C8"/><stop offset="100%" stop-color="#1FE9A8"/></linearGradient></defs>
+        <g fill="none" stroke="url(#g2)" stroke-width="2.4"><path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/></g>
+      </svg>
+    </div>
+    <div class="name">SynaptixSchedule</div>
+    <div class="pageno">02 / 07</div>
+  </div>
+  <div class="eyebrow">The clinic that runs on memory</div>
+  <h1 class="heading" style="font-size: 56px; max-width: 220mm;">Most clinics still run their day on a phone, a paper schedule, and the medical assistant&rsquo;s memory.</h1>
+  <p class="body" style="margin-top: 12mm; max-width: 200mm;">
+    A patient walks in with chest pain at 9:15. The MA flips through a binder, calls the front desk,
+    types the same patient ID into three different systems, and someone gets seen ten minutes later.
+    Repeat that fifty times a day, across fifty MAs, and you&rsquo;ve burned roughly a million and a half
+    dollars in time you&rsquo;re still paying for.
+  </p>
+  <div class="footer-rule"></div>
+</section>
+
+<!-- ============== SLIDE 3: WHAT IT IS ============== -->
+<section class="slide">
+  <div class="topbar">
+    <div class="chip">
+      <svg viewBox="0 0 32 32" aria-hidden><defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC9E8"/><stop offset="55%" stop-color="#2EE2C8"/><stop offset="100%" stop-color="#1FE9A8"/></linearGradient></defs><g fill="none" stroke="url(#g3)" stroke-width="2.4"><path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/></g></svg>
+    </div>
+    <div class="name">SynaptixSchedule</div>
+    <div class="pageno">03 / 07</div>
+  </div>
+  <div class="eyebrow">What it is</div>
+  <h1 class="heading" style="font-size: 56px; max-width: 220mm;">One screen. Replaces the whole dance.</h1>
+  <p class="body" style="margin-top: 12mm; max-width: 215mm;">
+    The MA pulls up a patient, types what&rsquo;s going on in plain English, and the screen shows
+    the urgency, the labs to order, and the next available appointment with the right doctor &mdash;
+    usually in <strong style="color:#1A73E8">under a minute</strong>.
+  </p>
+  <p class="body" style="margin-top: 8mm; max-width: 215mm;">
+    It plugs into the EHR you already have through FHIR, so nobody has to re-enter anything.
+    It runs in a browser. There&rsquo;s no on-prem server.
+  </p>
+  <div class="footer-rule"></div>
+</section>
+
+<!-- ============== SLIDE 4: DAY IN THE LIFE ============== -->
+<section class="slide">
+  <div class="topbar">
+    <div class="chip"><svg viewBox="0 0 32 32" aria-hidden><defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC9E8"/><stop offset="55%" stop-color="#2EE2C8"/><stop offset="100%" stop-color="#1FE9A8"/></linearGradient></defs><g fill="none" stroke="url(#g4)" stroke-width="2.4"><path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/></g></svg></div>
+    <div class="name">SynaptixSchedule</div>
+    <div class="pageno">04 / 07</div>
+  </div>
+  <div class="eyebrow">Sarah, MA · Cardiology clinic</div>
+  <p class="quote">
+    Sarah types &ldquo;<span class="accent">chest pain, came in this morning, looks pale and short of breath</span>.&rdquo;
+    The system flags it as an emergency, lists the three labs to order right now, and shows three doctors
+    who can see this patient today &mdash; ranked best fit first. <span class="accent">One tap. Booked.</span>
+  </p>
+  <p class="attribution">She didn&rsquo;t fill out a form. She didn&rsquo;t memorize the protocol card.<br>The system caught the red flags before she did.</p>
+  <div class="footer-rule"></div>
+</section>
+
+<!-- ============== SLIDE 5: THE MATH ============== -->
+<section class="slide">
+  <div class="topbar">
+    <div class="chip"><svg viewBox="0 0 32 32" aria-hidden><defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC9E8"/><stop offset="55%" stop-color="#2EE2C8"/><stop offset="100%" stop-color="#1FE9A8"/></linearGradient></defs><g fill="none" stroke="url(#g5)" stroke-width="2.4"><path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/></g></svg></div>
+    <div class="name">SynaptixSchedule</div>
+    <div class="pageno">05 / 07</div>
+  </div>
+  <div class="eyebrow">A 50-MA clinic</div>
+  <h1 class="heading" style="font-size: 56px;">It pays for itself in three weeks.</h1>
+  <div class="stat-row">
+    <div class="col">
+      <div class="big-stat brand-blue">$2M</div>
+      <div class="stat-label">value back per year</div>
+    </div>
+    <div class="col">
+      <div class="big-stat brand-navy">$120K</div>
+      <div class="stat-label">software cost per year</div>
+    </div>
+    <div class="col">
+      <div class="big-stat brand-green">~3wk</div>
+      <div class="stat-label">payback period</div>
+    </div>
+  </div>
+  <p class="small" style="margin-top: 14mm; max-width: 200mm;">
+    Time saved on triage and booking. Fewer no-shows. More claims paid. Earlier emergencies caught.
+    Lower MA turnover. Lawsuits that don&rsquo;t happen.
+  </p>
+  <div class="footer-rule"></div>
+</section>
+
+<!-- ============== SLIDE 6: TECH STACK ============== -->
+<section class="slide">
+  <div class="topbar">
+    <div class="chip"><svg viewBox="0 0 32 32" aria-hidden><defs><linearGradient id="g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC9E8"/><stop offset="55%" stop-color="#2EE2C8"/><stop offset="100%" stop-color="#1FE9A8"/></linearGradient></defs><g fill="none" stroke="url(#g6)" stroke-width="2.4"><path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/></g></svg></div>
+    <div class="name">SynaptixSchedule</div>
+    <div class="pageno">06 / 07</div>
+  </div>
+  <div class="eyebrow">What it runs on</div>
+  <h1 class="heading" style="font-size: 48px;">Modern, boring, reliable.</h1>
+  <p class="body" style="margin-top: 8mm; max-width: 215mm;">
+    Standard browser front end, serverless back end, and an LLM for the language understanding.
+    FHIR R4 for the EHR connection. No special hardware. A small clinic typically pays under
+    <strong>$500 a month</strong> for hosting.
+  </p>
+  <div class="chips">
+    <span class="tech-chip"><strong>Frontend</strong> &nbsp;React 18 · TypeScript · MUI v7</span>
+    <span class="tech-chip"><strong>Backend</strong> &nbsp;FastAPI · Python 3.11</span>
+    <span class="tech-chip"><strong>AI</strong> &nbsp;Vertex AI Llama 4 · RAG-ready</span>
+    <span class="tech-chip"><strong>FHIR</strong> &nbsp;HAPI FHIR R4 · Patient · Slot · Appointment</span>
+    <span class="tech-chip"><strong>Data</strong> &nbsp;Cloud SQL Postgres 15</span>
+    <span class="tech-chip"><strong>Hosting</strong> &nbsp;Google Cloud Run · scales to zero</span>
+    <span class="tech-chip"><strong>Compliance</strong> &nbsp;HIPAA-aligned · 21st Century Cures</span>
+  </div>
+  <div class="footer-rule"></div>
+</section>
+
+<!-- ============== SLIDE 7: DEMO + CLOSE ============== -->
+<section class="slide">
+  <div class="topbar">
+    <div class="chip"><svg viewBox="0 0 32 32" aria-hidden><defs><linearGradient id="g7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FC9E8"/><stop offset="55%" stop-color="#2EE2C8"/><stop offset="100%" stop-color="#1FE9A8"/></linearGradient></defs><g fill="none" stroke="url(#g7)" stroke-width="2.4"><path d="M 22 5 L 11 5 L 11 12 L 22 12 L 22 20 L 11 20 L 11 27 L 22 27"/></g></svg></div>
+    <div class="name">SynaptixSchedule</div>
+    <div class="pageno">07 / 07</div>
+  </div>
+  <div class="eyebrow">In the demo</div>
+  <h1 class="heading" style="font-size: 44px;">Fifteen minutes. Five real patients. Five specialties.</h1>
+  <ul class="demo-list">
+    <li>Live MA login against the real FHIR server &mdash; test patients 1002, 1003, 1005, 1006, 1007</li>
+    <li>Active triage protocols across cardiology, primary care, orthopedics, pulmonology, endocrinology</li>
+    <li>Real appointment booking with FHIR confirmation number on screen</li>
+    <li>Today&rsquo;s agenda populated from the live Postgres appointments table</li>
+  </ul>
+  <div class="close-card">
+    <div class="h">Want it for your team?</div>
+    <div class="b">
+      Sandbox in two days &mdash; your facility, your specialties, synthetic patients, no PHI, no commitment.
+      Send a note.
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
