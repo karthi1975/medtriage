@@ -57,3 +57,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+
+# Pitch deck builds (regenerable from build_pitch_pptx.py + pitch_deck.html)
+SynaptixSchedule_pitch_deck.pptx
+.pptx_venv/
+/tmp/synaptix_slides/
