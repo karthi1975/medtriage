@@ -12,11 +12,8 @@ import {
   Stack,
   Typography,
   Checkbox,
-  IconButton,
-  Tooltip,
   useTheme,
 } from '@mui/material';
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import { PanelShell } from './PanelShell';
 import { parseTestRequirements, getOrderColor, type TestRequirement } from '../../utils/clinicalParsers';
 import { useChat } from '../../context/ChatContext';
@@ -101,22 +98,11 @@ export const OrdersPanel: React.FC<OrdersPanelProps> = ({ testingStatus, height 
 
   const subtitle = total > 0 ? `· ${done}/${total} done` : undefined;
 
-  // Empty state
+  // Empty state — no actions slot so the header matches TriagePanel's
+  // (both panels render an identical title bar).
   if (!testingStatus || total === 0) {
     return (
-      <PanelShell
-        title="Order Requirements"
-        height={height}
-        actions={
-          <Tooltip title="Refresh from chat">
-            <span>
-              <IconButton size="small" disabled sx={{ p: 0.25 }}>
-                <RefreshRoundedIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        }
-      >
+      <PanelShell title="Order Requirements" height={height}>
         <Box
           sx={{
             display: 'flex',

@@ -11,8 +11,10 @@
  * full list — keeps scan height bounded without losing fidelity.
  */
 import React from 'react';
-import { Box, Stack, Typography, Tooltip, useTheme } from '@mui/material';
+import { Box, Stack, Typography, Tooltip, IconButton, useTheme } from '@mui/material';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import { useChat } from '../../context/ChatContext';
 import type { Patient } from '../../types';
 
 interface PatientCardProps {
@@ -95,6 +97,7 @@ function compress(items: string[] | undefined, max = 3): { display: string; full
 
 export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
   const theme = useTheme();
+  const { clearChat } = useChat();
   // Strip NKDA-style sentinels before counting — "No known drug allergies"
   // is the opposite of an alert and must not turn the card red.
   const allergies = filterRealAllergies(patient.allergies);
@@ -222,6 +225,25 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
             </Stack>
           </Tooltip>
         )}
+        {/* End encounter — clears patient context + chat for the next patient. */}
+        <Tooltip title="End encounter — clear this patient and start fresh" placement="bottom-end">
+          <IconButton
+            onClick={clearChat}
+            size="small"
+            aria-label="End encounter"
+            sx={{
+              p: 0.4,
+              ml: 0.5,
+              color: 'text.secondary',
+              '&:hover': {
+                bgcolor: 'rgba(11,19,64,0.06)',
+                color: theme.palette.brand?.navy ?? 'primary.main',
+              },
+            }}
+          >
+            <LogoutRoundedIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
       </Box>
 
       {/* Row 2: clinical (allergies / conditions / meds) */}

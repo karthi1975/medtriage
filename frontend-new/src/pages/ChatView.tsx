@@ -182,9 +182,18 @@ export const ChatView: React.FC = () => {
           }
           trailing={
             <Stack direction="row" alignItems="center" spacing={1.5}>
-              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-                <Typography variant="bodyMedium">{session.ma_name}</Typography>
-                <Typography variant="labelSmall" color="text.secondary">
+              <Box
+                sx={{
+                  textAlign: 'right',
+                  display: { xs: 'none', sm: 'flex' },
+                  flexDirection: 'column',
+                  lineHeight: 1.2,
+                }}
+              >
+                <Typography variant="bodyMedium" component="div" sx={{ fontWeight: 500 }}>
+                  {session.ma_name}
+                </Typography>
+                <Typography variant="labelSmall" component="div" color="text.secondary">
                   {session.facility_name} • {session.specialty_name}
                 </Typography>
               </Box>

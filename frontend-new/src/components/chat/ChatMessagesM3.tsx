@@ -22,6 +22,19 @@ import { useChat } from '../../context/ChatContext';
 import { useMASession } from '../../context/MASessionContext';
 import { useTodayAppointments } from '../../hooks/useTodayAppointments';
 import { format } from 'date-fns';
+
+/**
+ * Parse a backend timestamp safely. FastAPI's `datetime.utcnow().isoformat()`
+ * returns a naive ISO string (no Z, no offset) — JS's Date constructor treats
+ * that as LOCAL time, which makes a UTC backend show 6-7 hours off in MST.
+ * Defensive fix: when no timezone marker is present, append 'Z' so it's
+ * always interpreted as UTC, then `format` converts to the browser's local
+ * time correctly.
+ */
+function parseChatTimestamp(ts: string): Date {
+  const hasTzMarker = /[Zz]$|[+-]\d{2}:?\d{2}$/.test(ts);
+  return new Date(hasTzMarker ? ts : ts + 'Z');
+}
 import { AppointmentConfirmation } from '../AppointmentConfirmation';
 import { PriorityChip } from '../md3/Chips';
 import type { PriorityChipLevel } from '../md3/Chips';
@@ -281,27 +294,31 @@ const WelcomeHero: React.FC = () => {
                 borderRadius: 2,
                 p: 1.75,
                 textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.5,
               }}
             >
               <Typography
                 variant="labelSmall"
+                component="div"
                 sx={{ textTransform: 'uppercase', letterSpacing: '0.10em', color: 'text.secondary' }}
               >
                 {s.label}
               </Typography>
               <Typography
+                component="div"
                 sx={{
                   fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
                   fontSize: 28,
                   fontWeight: 700,
                   color: s.tone,
                   lineHeight: 1.1,
-                  mt: 0.5,
                 }}
               >
                 {s.value}
               </Typography>
-              <Typography variant="bodySmall" color="text.secondary" sx={{ mt: 0.25 }}>
+              <Typography variant="bodySmall" component="div" color="text.secondary">
                 {s.sub}
               </Typography>
             </Box>
@@ -360,11 +377,27 @@ const WelcomeHero: React.FC = () => {
               >
                 {q.icon}
               </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="bodyMedium" sx={{ fontWeight: 500, color: 'text.primary' }}>
+              <Box
+                sx={{
+                  minWidth: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.25,
+                }}
+              >
+                <Typography
+                  variant="bodyMedium"
+                  component="div"
+                  sx={{ fontWeight: 500, color: 'text.primary', lineHeight: 1.25 }}
+                >
                   {q.label}
                 </Typography>
-                <Typography variant="bodySmall" color="text.secondary">
+                <Typography
+                  variant="bodySmall"
+                  component="div"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.3 }}
+                >
                   {q.hint}
                 </Typography>
               </Box>
@@ -404,7 +437,7 @@ export const ChatMessagesM3: React.FC = () => {
     <Stack spacing={2} p={2} sx={{ overflowY: 'auto', flex: 1 }}>
       {messages.map((msg) => {
         const isUser = msg.role === 'user';
-        const timestamp = msg.timestamp ? format(new Date(msg.timestamp), 'h:mm a') : '';
+        const timestamp = msg.timestamp ? format(parseChatTimestamp(msg.timestamp), 'h:mm a') : '';
         const bubbleBg = isUser ? theme.palette.chat.user : theme.palette.chat.assistant;
         const bubbleRadius = isUser
           ? `${theme.corner.large}px ${theme.corner.large}px ${theme.corner.extraSmall}px ${theme.corner.large}px`
